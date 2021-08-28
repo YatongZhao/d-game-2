@@ -1,0 +1,36 @@
+import { battleGroundDistance, battleGroundHeight, battleGroundWidth, enemySize } from "./const";
+
+let canvas: HTMLCanvasElement;
+export const setCanvas = (_canvas: HTMLCanvasElement) => canvas = _canvas;
+
+const getIndex = (row: number, column: number) => {
+    return row * 15 + column;
+}
+
+export const draw = (frame: any) => {
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) return;
+    ctx.clearRect(0, 0, battleGroundWidth, battleGroundHeight);
+    
+    for (let row = 0; row < 30; row++) {
+        for (let col = 0; col < 15; col++) {
+            const idx = getIndex(row, col);
+            const x = (col * (enemySize + 15) + 20);
+            const y = (row * (-enemySize - 15) + 15 + frame.enemys.lengthTraveled);
+            
+            ctx.font = '32px Arial';
+            ctx.textAlign = 'center';
+            ctx.beginPath();
+            ctx.fillText(`${frame.enemys.enemys[idx].value}`, x + 28, y + 38);
+            ctx.strokeRect(
+                x,
+                y,
+                enemySize,
+                enemySize
+            );
+        }
+    }
+
+    ctx.stroke();
+}
