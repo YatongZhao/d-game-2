@@ -27,7 +27,7 @@ const config: webpack.Configuration & WebpackDevServerConfiguration = {
         mainFields: ['svelte', 'browser', 'module', 'main']
     },
     devServer: {
-        hot: true
+        hot: false
     },
     module: {
         rules: [

@@ -3,6 +3,8 @@ import { battleGroundDistance, battleGroundWidth, enemyColumn, enemySize, enemyY
 const BATTLE_TURN = Symbol('BATTLE_TURN');
 const STRATEGY_TURN = Symbol('STRATEGY_TURN');
 
+let HP = 1000;
+
 let currentTurn = STRATEGY_TURN;
 let currentRound = 0;
 
@@ -16,17 +18,15 @@ type EnemyQueue = {
 }
 
 type EnemySet = {
-    length: number;
     enemys: Enemy[];
     lengthTraveled: number;
 }
 
 let currentEnemySet: EnemySet = {
-    length: 0,
     enemys: [],
     lengthTraveled: 0,
 };
-let currentEnemySpeed = 1;
+let currentEnemySpeed = 5;
 let currentAliveEnemyQueue: EnemyQueue|null = null;
 
 let consumedFrameNumber = 0;
@@ -35,7 +35,6 @@ let isWorkLoopRunning = false;
 
 function prepareBattleTurn(turnRound: number) {
     let enemySet: EnemySet = {
-        length: 450,
         enemys: [],
         lengthTraveled: 0,
     };
@@ -43,7 +42,7 @@ function prepareBattleTurn(turnRound: number) {
     let enemys: Enemy[] = [];
     for (let i = 0; i < 450; i++) {
         enemys.push({
-            value: Math.floor(Math.random() * 10),
+            value: Math.ceil(Math.random() * 10),
             index: i,
         });
     }
@@ -76,13 +75,17 @@ function enemyCrossEndLine() {
     ) * enemyColumn;
 
     while (currentAliveEnemyQueue && currentAliveEnemyQueue.enemy.index < targetIndex) {
+        let value = currentAliveEnemyQueue.enemy.value;
+        HP -= value;
+        HP = HP < 0 ? 0 : HP;
         currentAliveEnemyQueue.enemy.value = 0;
         currentAliveEnemyQueue = currentAliveEnemyQueue.next;
     }
 }
 
 function isBattleToTheEnd() {
-    return currentEnemySet.lengthTraveled > battleGroundDistance + 600;
+    return currentAliveEnemyQueue === null
+        || HP <= 0;
 }
 
 async function battleTurnWorkLoop() {
@@ -117,7 +120,8 @@ const produceFrame = () => {
     self.postMessage({
       type: 'PUSH_FRAME',
       frame: {
-          enemys: currentEnemySet
+          enemys: currentEnemySet,
+          HP,
       },
     });
     producedFrameNumber++;
@@ -138,6 +142,5 @@ export const addConsumedFrameNumber = async () => {
 export default () => ({
     startFighting,
     addConsumedFrameNumber,
-    // ...self
     addEventListener: self.addEventListener,
 });

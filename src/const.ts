@@ -6,3 +6,5 @@ export const enemySize = 50;
 export const enemyYSpace = 15;
 export const enemyColumn = 15;
 export const enemyRow = 30;
+export const HPWidth = 1000;
+export const HPHeight = 36;

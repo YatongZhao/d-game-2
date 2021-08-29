@@ -1,18 +1,22 @@
 import { game } from './game';
 import { draw } from './draw';
+import { port1 } from './messageChannel';
 
 const stack: {}[] = [];
 let isRenderLoopGoing = false;
 
 const render = () => {
     isRenderLoopGoing = true;
-    const frame = stack.shift();
+    const frame = stack.shift() as any;
 
     if (!frame) {
         isRenderLoopGoing = false;
         return;
     }
     draw(frame);
+    port1.postMessage({
+        HP: frame.HP
+    });
     game.addConsumedFrameNumber();
 
     requestAnimationFrame(() => {
