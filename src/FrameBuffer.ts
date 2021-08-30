@@ -1,6 +1,7 @@
 import { game } from './game';
 import { draw } from './draw';
 import { port1 } from './messageChannel';
+import { setHero } from './draw/drawHero';
 
 const stack: {}[] = [];
 let isRenderLoopGoing = false;
@@ -16,6 +17,10 @@ const render = () => {
     draw(frame);
     port1.postMessage({
         HP: frame.HP
+    });
+    setHero({
+        onStageHero: frame.onStageHero,
+        offStageHero: frame.offStageHero,
     });
     game.addConsumedFrameNumber();
 

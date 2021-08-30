@@ -26,6 +26,11 @@ export const draw = (frame: any) => {
             ctx.font = '32px Arial';
             ctx.textAlign = 'center';
             ctx.beginPath();
+            ctx.fillStyle = 'white';
+            ctx.fillRect(
+                x, y, enemySize, enemySize
+            )
+            ctx.fillStyle = 'black';
             ctx.fillText(`${frame.enemys.enemys[idx].value}`, x + 25, y + 36);
             ctx.strokeRect(
                 x,
