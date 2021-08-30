@@ -2,8 +2,9 @@ import { game } from './game';
 import { draw } from './draw';
 import { port1 } from './messageChannel';
 import { setHero } from './draw/drawHero';
+import { drawBullet } from './draw/drawBullet';
 
-const stack: {}[] = [];
+let stack: {}[] = [];
 let isRenderLoopGoing = false;
 
 const render = () => {
@@ -22,6 +23,7 @@ const render = () => {
         onStageHero: frame.onStageHero,
         offStageHero: frame.offStageHero,
     });
+    drawBullet(frame.bullets);
     game.addConsumedFrameNumber();
 
     requestAnimationFrame(() => {
@@ -34,17 +36,14 @@ const requestRender = () => {
     render();
 }
 
-/**
- * 每生产一帧，就请求消费循环
- */
-export const pushFrame = (frame: {}) => {
-    stack.push(frame);
+const pushFrames = (frames: {}[]) => {
+    stack = stack.concat(frames);
     requestRender();
 }
 
 game.addEventListener('message', (ev: any) => {
-    if (ev.data.type === 'PUSH_FRAME') {
-        pushFrame(ev.data.frame);
+    if (ev.data.type === 'PUSH_FRAMES') {
+        pushFrames(ev.data.frames);
     }
 });
 

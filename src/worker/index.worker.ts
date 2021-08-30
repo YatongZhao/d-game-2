@@ -7,6 +7,8 @@ export const startFighting = async () => {
 
 export const addConsumedFrameNumber = async () => {
     game.currentRound.addConsumedFrameNumber();
+    game.requestPushFrame = true;
+    game.pushFrame();
 }
 
 export default () => ({

@@ -1,4 +1,4 @@
-import { battleGroundDistance, battleGroundHeight, battleGroundWidth, enemySize, HPHeight, HPWidth } from "./const";
+import { battleGroundDistance, battleGroundHeight, battleGroundWidth, enemySize, enemyXSpace, enemyXStartPadding, enemyYSpace, HPHeight, HPWidth } from "./const";
 
 let canvas: HTMLCanvasElement;
 export const setCanvas = (_canvas: HTMLCanvasElement) => canvas = _canvas;
@@ -20,8 +20,8 @@ export const draw = (frame: any) => {
             if (value === 0) {
                 continue;
             }
-            const x = (col * (enemySize + 15) + 20);
-            const y = (row * (-enemySize - 15) + 15 + frame.enemys.lengthTraveled);
+            const x = (col * (enemySize + enemyXSpace) + enemyXStartPadding);
+            const y = (row * (-enemySize - enemyYSpace) + frame.enemys.lengthTraveled);
             
             ctx.font = '32px Arial';
             ctx.textAlign = 'center';

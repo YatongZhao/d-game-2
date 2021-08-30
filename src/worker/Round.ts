@@ -2,7 +2,7 @@ import { EnemySet } from "./EnemySet";
 import type { Game } from "./Game";
 
 export class Round {
-    enemySet = new EnemySet(this);
+    enemySet: EnemySet;
     game: Game;
     isWorkLoopRunning = false;
 
@@ -11,6 +11,7 @@ export class Round {
 
     constructor(game: Game) {
         this.game = game;
+        this.enemySet = new EnemySet(this);
     }
 
     startBattle() {
@@ -23,12 +24,14 @@ export class Round {
             this.game.frameCounter.add();
 
             this.enemySet.go();
+            this.game.heroSet.go();
+            this.game.bulletSet.go();
 
             this.game.produceFrame();
             this.producedFrameNumber++;
             await Promise.resolve();
 
-            if (this.producedFrameNumber - this.consumedFrameNumber > 500) {
+            if (this.producedFrameNumber - this.consumedFrameNumber > 2) {
                 this.isWorkLoopRunning = false;
                 return;
             }

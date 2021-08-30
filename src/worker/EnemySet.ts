@@ -6,8 +6,8 @@ export class EnemySet {
     enemys: Enemy[] = [];
     aliveEnemyNumber = 0;
     enemyOnGroundQueue: EnemyQueue|null = null;
-    lengthTraveled = 0;
-    speed = 5;
+    lengthTraveled = 300;
+    speed = 2;
     endLineIndex = 0;
     round: Round;
 
@@ -19,7 +19,7 @@ export class EnemySet {
     prepareEnemySet() {
         let enemys: Enemy[] = [];
         for (let i = 0; i < 450; i++) {
-            enemys.push(new Enemy(Math.ceil(Math.random() * 10), i));
+            enemys.push(new Enemy(this.round.game, Math.ceil(Math.random() * 10), i));
         }
 
         this.enemys = enemys;
@@ -62,7 +62,7 @@ export class EnemySet {
 
     findEnemyByPoint(x: number, y: number) {
         if ((x - enemyXStartPadding) % (enemyXSpace + enemySize) > enemySize
-            || (y + (this.lengthTraveled % (enemyYSpace + enemySize))) % (enemyYSpace + enemySize) > enemySize) {
+            || ((y % (enemyYSpace + enemySize) + (this.lengthTraveled % (enemyYSpace + enemySize))) % (enemyYSpace + enemySize) > enemySize)) {
                 return null;
         }
     
@@ -72,10 +72,13 @@ export class EnemySet {
             return null;
         }
     
-        return this.enemys[
+        let maybeEnemy = this.enemys[
             enemyColumn * (enemyRow -
-                Math.ceil((y - this.lengthTraveled + enemyRow * (enemyYSpace + enemySize)) / (enemyYSpace + enemySize))
-            ) + x0
+                Math.floor((y - this.lengthTraveled + enemyRow * (enemyYSpace + enemySize)) / (enemyYSpace + enemySize))
+            ) + x0 - 1
         ];
+
+        if (maybeEnemy && maybeEnemy.value) return maybeEnemy;
+        return null;
     }
 }

@@ -1,6 +1,7 @@
 import { v4 as uuidV4 } from 'uuid';
 import { Bullet } from './Bullet';
 import type { Game } from './Game';
+import { GrapeshotBullet } from './GrapeshotBullet';
 
 export class Hero {
     level = 1;
@@ -43,7 +44,7 @@ export class GrapeshotHero extends Hero {
     go() {
         if (this.game.frameCounter.value % this.cycle === 0) {
             for (let i = 0; i < this.bulletNumber; i++) {
-                this.game.bulletSet.add(new Bullet());
+                this.game.bulletSet.add(new GrapeshotBullet(this.game, this));
             }
         }
     }

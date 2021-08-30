@@ -1,4 +1,4 @@
-export const battleGroundDistance = 2000;
+export const battleGroundDistance = 1700;
 export const battleGroundWidth = 1000;
 
 export const heroCanvasHeight = 320;

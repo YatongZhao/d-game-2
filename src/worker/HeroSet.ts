@@ -11,12 +11,19 @@ export class HeroSet {
     game: Game;
     offStageHero: (Hero|null)[] = [null, null, null, null, null, null, null, null, null];
     onStageHero: (Hero|null)[] = [null, null, null, null, null, null, null, null, null];
+    onStageNotNullHero: Hero[] = [];
     get canBuyNumber() {
         return this.offStageHero.filter(hero => !hero).length;
     }
 
     constructor(game: Game) {
         this.game = game;
+        this.onStageHero[0] = GrapeshotHero.fromPosition(game, onStageHeroPosition[0]);
+        this.onStageNotNullHero.push(this.onStageHero[0]);
+    }
+
+    go() {
+        this.onStageNotNullHero.forEach(hero => hero.go());
     }
 
     add() {
@@ -43,5 +50,7 @@ export class HeroSet {
         if (maybeHero1) {
             maybeHero1.setPosition(position2[pos2.index]);
         }
+
+        this.onStageNotNullHero = this.onStageHero.filter(Boolean) as Hero[];
     }
 }
