@@ -1,4 +1,4 @@
-import { heroCanvasHeight, heroCanvasWidth, heroInfo, heroSize, HPHeight, HPWidth, isHitHeroPosition, offStageHeroPosition, onStageHeroPosition } from "../const";
+import { heroCanvasHeight, heroCanvasWidth, heroInfo, heroInfoSet, heroSize, HPHeight, HPWidth, isHitHeroPosition, offStageHeroPosition, onStageHeroPosition } from "../const";
 import type { Hero } from "../worker/Hero";
 
 class HeroRenderer {
@@ -78,12 +78,12 @@ class HeroRenderer {
         this.renderOutMove();
     }
 
-    setMove(hero: Hero, position: {x: number, y: number}) {
+    setMove(hero: heroInfoSet, position: {x: number, y: number}) {
         const ctx = this.moveCanvas.getContext('2d');
         if (!ctx) return;
         
         ctx.clearRect(0, 0, heroCanvasWidth, heroCanvasHeight);
-        this.requestDrawHero(ctx, null, position);
+        this.requestDrawHero(ctx, hero.hero, position);
 
         this.renderOutMove();
     }
@@ -102,7 +102,7 @@ class HeroRenderer {
             
             currentHero[i] = _hero;
             let position = (stage === 'on' ? onStageHeroPosition : offStageHeroPosition)[i];
-            ctx.clearRect(position.x - heroSize / 2, position.y - heroSize / 2, heroSize, heroSize);
+            ctx.clearRect(position.x - heroSize / 2 - 1, position.y - heroSize / 2 - 1, heroSize + 2, heroSize + 2);
             this.requestDrawHero(ctx, _hero, position);
         });
     }
@@ -110,9 +110,11 @@ class HeroRenderer {
     requestDrawHero(ctx: CanvasRenderingContext2D, hero: Hero|null, position: {x: number; y: number}) {
         let x = position.x - heroSize / 2;
         let y = position.y - heroSize / 2;
-        ctx.strokeRect(x, y, heroSize, heroSize);
-        ctx.fillStyle = 'white';
-        ctx.fillRect(x, y, heroSize, heroSize);
+        if (hero) {
+            ctx.strokeRect(x, y, heroSize, heroSize);
+            ctx.fillStyle = 'white';
+            ctx.fillRect(x, y, heroSize, heroSize);
+        }
         this.outHeroCanvas.forEach(canvas => {
             const ctx = canvas.getContext('2d');
             if (!ctx || !this.heroCtx) return;
@@ -123,12 +125,14 @@ class HeroRenderer {
         });
     }
 
-    isHitHero(x: number, y: number): Hero|null {
+    isHitHero(x: number, y: number): heroInfoSet|null {
         let heroInfo = isHitHeroPosition(x, y);
         if (!heroInfo) return null;
         let maybeHero = (heroInfo.stage === 'on' ? this.currentOnStageHero : this.currentOffStageHero)[heroInfo.index];
-        if (!maybeHero) return null;
-        return maybeHero;
+        return {
+            hero: maybeHero,
+            heroInfo
+        };
     }
 }
 

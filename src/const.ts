@@ -1,3 +1,5 @@
+import type { Hero } from "./worker/Hero";
+
 export const battleGroundDistance = 1700;
 export const battleGroundWidth = 1000;
 
@@ -37,6 +39,11 @@ export const hitSize = 120;
 export type heroInfo = {
     stage: 'on'|'off';
     index: number;
+}
+
+export type heroInfoSet = {
+    hero: Hero|null;
+    heroInfo: heroInfo;
 }
 
 export const isHitHeroPosition = (x: number, y: number): heroInfo|null => {

@@ -6,12 +6,15 @@ import type { Hero, heroCopy } from "./Hero";
 import { HeroSet } from "./HeroSet";
 import { Round } from "./Round";
 
+export type currentTurn = 'BATTLE_TURN'|'STRATEGY_TURN';
+
 export class Game {
     heroSet = new HeroSet(this);
     bulletSet = new BulletSet();
     currentRound = new Round(this, 1);
     frameCounter = new FrameCounter();
     frameBuffer: {
+        currentTurn: currentTurn;
         HP: number;
         enemys: enemySetCopy;
         onStageHero: (heroCopy|null)[];
@@ -21,7 +24,7 @@ export class Game {
     }[] = [];
     requestPushFrame = false;
 
-    currentTurn: 'BATTLE_TURN'|'STRATEGY_TURN' = 'STRATEGY_TURN';
+    currentTurn: currentTurn = 'STRATEGY_TURN';
 
     HP = 1000;
     $ = 500;
@@ -41,6 +44,7 @@ export class Game {
 
     produceFrame() {
         this.frameBuffer.push({
+            currentTurn: this.currentTurn,
             HP: this.HP,
             enemys: this.currentRound.enemySet.copy(),
             onStageHero: this.heroSet.copyOnStageHero(),

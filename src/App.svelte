@@ -1,6 +1,6 @@
 <script lang="ts">
 import { onDestroy, onMount } from "svelte";
-import { battleGroundDistance, battleGroundHeight, battleGroundWidth, heroCanvasHeight, heroCanvasWidth, heroInfo, HPHeight, HPWidth } from "./const";
+import { battleGroundDistance, battleGroundHeight, battleGroundWidth, heroCanvasHeight, heroCanvasWidth, heroInfo, heroInfoSet, HPHeight, HPWidth } from "./const";
 import { setCanvas } from "./draw";
 import { setBulletCanvas } from "./draw/drawBullet";
 import { heroRenderer } from "./draw/drawHero";
@@ -9,6 +9,7 @@ import { game } from "./game";
 import Hero from "./Hero.svelte";
 import { port2 } from "./messageChannel";
 import Shop from "./Shop.svelte";
+import type { currentTurn } from "./worker/Game";
 import type { Hero as HeroType } from './worker/Hero';
 
     let canvas: HTMLCanvasElement;
@@ -17,6 +18,7 @@ import type { Hero as HeroType } from './worker/Hero';
 	let HP = 0;
 	let roundNumber = 1;
 	let showShop = false;
+	let currentTurn: currentTurn = 'STRATEGY_TURN';
 	
 	let width = window.innerWidth;
 	let height = window.innerHeight;
@@ -27,13 +29,14 @@ import type { Hero as HeroType } from './worker/Hero';
 	let heroTop = 0;
 
 	let showHeroShadow = false;
-	let hitedHero: HeroType;
+	let hitedHero: heroInfoSet|null = null;
 	let heroTouchX = 0;
 	let heroTouchY = 0;
 	
 	function handleMessage(msg: MessageEvent) {
 		HP = msg.data.HP;
 		roundNumber = msg.data.roundNumber;
+		currentTurn = msg.data.currentTurn;
 		setHP(HP);
 	}
 
@@ -50,19 +53,27 @@ import type { Hero as HeroType } from './worker/Hero';
 		heroTop = heroSec.offsetTop;
 	};
 
-	function handleHeroTouchEnd() {
+	async function handleHeroTouchEnd() {
 		showHeroShadow = false;
 		heroRenderer.clearOutMove();
 		window.removeEventListener('touchmove', handleHeroTouchMove);
+		if (hitedHero) {
+			let hitedHero2 = heroRenderer.isHitHero(heroTouchX, heroTouchY);
+			if (hitedHero2 && hitedHero2.hero !== hitedHero.hero) {
+				let res = await game.moveHero(hitedHero.heroInfo, hitedHero2.heroInfo);
+				heroRenderer.setHero(res as any);
+			}
+		}
+		hitedHero = null;
 	}
 
 	function handleHeroTouchMove(e: TouchEvent) {
         e.preventDefault();
         e.stopPropagation();
-		let x = e.touches[0].clientX;
-		let y = e.touches[0].clientY;
-		getHeroTouchPosition(x, y);
-		heroRenderer.setMove(hitedHero, { x: heroTouchX, y: heroTouchY });
+		let {x, y} = getHeroTouchPosition(e);
+		heroTouchY = y;
+		heroTouchX = x;
+		hitedHero && heroRenderer.setMove(hitedHero, { x: heroTouchX, y: heroTouchY });
 	}
 
 	onMount(() => {
@@ -92,7 +103,9 @@ import type { Hero as HeroType } from './worker/Hero';
 		window.removeEventListener('touchend', handleHeroTouchEnd);
 	});
 
-	function getHeroTouchPosition(x: number, y: number) {
+	function getHeroTouchPosition(event: TouchEvent) {
+		let x = event.touches[0].clientX;
+		let y = event.touches[0].clientY;
 		let _ratio;
 		if (ratio > 2) {
 			_ratio = width / battleGroundWidth;
@@ -104,17 +117,14 @@ import type { Hero as HeroType } from './worker/Hero';
 		}
 		y /= _ratio;
 		x /= _ratio;
-		heroTouchY = y;
-		heroTouchX = x;
 		return {x, y};
 	}
 
 	function handleTouchStart(event: TouchEvent) {
-		let x = event.touches[0].clientX;
-		let y = event.touches[0].clientY;
-		let pos = getHeroTouchPosition(x, y);
-		x = pos.x;
-		y = pos.y;
+		if (currentTurn === 'BATTLE_TURN') return;
+		let {x, y} = getHeroTouchPosition(event);
+		heroTouchY = y;
+		heroTouchX = x;
 		let _hitedHero = heroRenderer.isHitHero(x, y);
 		if (_hitedHero) {
 			event.preventDefault();

@@ -34,7 +34,7 @@ export class EnemySet {
     prepareEnemySet() {
         let enemys: Enemy[] = [];
         for (let i = 0; i < 450; i++) {
-            enemys.push(new Enemy(this.round.game, Math.ceil(Math.random() * (10 + 2 * this.round.roundNumber)), i));
+            enemys.push(new Enemy(this.round.game, Math.ceil(Math.random() * (-1 + 2 * this.round.roundNumber + 0.1 * Math.floor(i / 15))), i));
         }
 
         this.enemys = enemys;

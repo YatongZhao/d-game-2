@@ -17,6 +17,7 @@ const render = () => {
     }
     draw(frame);
     port1.postMessage({
+        currentTurn: frame.currentTurn,
         HP: frame.HP,
         roundNumber: frame.roundNumber,
     });
