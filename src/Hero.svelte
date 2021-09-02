@@ -49,16 +49,20 @@ import { heroRenderer } from "./draw/drawHero";
         height: 100%;
         left: 0;
         top: 0;
+        z-index: 99;
     }
     canvas {
         width: 100%;
         display: block;
+        position: relative;
+        z-index: 100;
     }
     .move-canvas {
         position: absolute;
         width: 100%;
         left: 0;
         top: 0;
+        z-index: 101;
     }
     .top-container {
         display: flex;

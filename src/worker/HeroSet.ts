@@ -1,6 +1,6 @@
 import { offStageHeroPosition, onStageHeroPosition } from "../const";
 import type { Game } from "./Game";
-import { GrapeshotHero, Hero } from "./Hero";
+import { GrapeshotHero, Hero, heroCopy } from "./Hero";
 
 type heroPos = {
     stage: 'on'|'off';
@@ -19,7 +19,41 @@ export class HeroSet {
     constructor(game: Game) {
         this.game = game;
         this.onStageHero[0] = GrapeshotHero.fromPosition(game, onStageHeroPosition[0]);
+        // this.onStageHero[1] = GrapeshotHero.fromPosition(game, onStageHeroPosition[1]);
+        // this.onStageHero[2] = GrapeshotHero.fromPosition(game, onStageHeroPosition[2]);
+        // this.onStageHero[3] = GrapeshotHero.fromPosition(game, onStageHeroPosition[3]);
+        // this.onStageHero[4] = GrapeshotHero.fromPosition(game, onStageHeroPosition[4]);
+        // this.onStageHero[5] = GrapeshotHero.fromPosition(game, onStageHeroPosition[5]);
+        // this.onStageHero[6] = GrapeshotHero.fromPosition(game, onStageHeroPosition[6]);
+        // this.onStageHero[7] = GrapeshotHero.fromPosition(game, onStageHeroPosition[7]);
+        // this.onStageHero[8] = GrapeshotHero.fromPosition(game, onStageHeroPosition[8]);
         this.onStageNotNullHero.push(this.onStageHero[0]);
+        // this.onStageNotNullHero.push(this.onStageHero[1]);
+        // this.onStageNotNullHero.push(this.onStageHero[2]);
+        // this.onStageNotNullHero.push(this.onStageHero[3]);
+        // this.onStageNotNullHero.push(this.onStageHero[4]);
+        // this.onStageNotNullHero.push(this.onStageHero[5]);
+        // this.onStageNotNullHero.push(this.onStageHero[6]);
+        // this.onStageNotNullHero.push(this.onStageHero[7]);
+        // this.onStageNotNullHero.push(this.onStageHero[8]);
+    }
+
+    copyOffStageHero(): (heroCopy|null)[] {
+        return this.offStageHero.map(hero => hero && ({
+            level: hero.level,
+            killNumber: hero.killNumber,
+            id: hero.id,
+            x: hero.x, y: hero.y
+        }));
+    }
+
+    copyOnStageHero(): (heroCopy|null)[] {
+        return this.onStageHero.map(hero => hero && ({
+            level: hero.level,
+            killNumber: hero.killNumber,
+            id: hero.id,
+            x: hero.x, y: hero.y
+        }));
     }
 
     go() {

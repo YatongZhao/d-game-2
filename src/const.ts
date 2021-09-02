@@ -39,7 +39,7 @@ export type heroInfo = {
     index: number;
 }
 
-export const isHitHero = (x: number, y: number): heroInfo|null => {
+export const isHitHeroPosition = (x: number, y: number): heroInfo|null => {
     let index = onStageHeroPosition.findIndex(({x: _x, y: _y}) => {
         let dx = x - _x;
         let dy = y - _y;

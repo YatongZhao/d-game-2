@@ -1,4 +1,4 @@
-import { heroCanvasHeight, heroCanvasWidth, heroInfo, heroSize, HPHeight, HPWidth, offStageHeroPosition, onStageHeroPosition } from "../const";
+import { heroCanvasHeight, heroCanvasWidth, heroInfo, heroSize, HPHeight, HPWidth, isHitHeroPosition, offStageHeroPosition, onStageHeroPosition } from "../const";
 import type { Hero } from "../worker/Hero";
 
 class HeroRenderer {
@@ -56,7 +56,7 @@ class HeroRenderer {
         this.diffHero(this.currentOffStageHero, offStageHero, 'off');
         this.diffHero(this.currentOnStageHero, onStageHero, 'on');
 
-        this.renderOutHero();
+        // this.renderOutHero();
     }
 
     renderOutMove() {
@@ -78,7 +78,7 @@ class HeroRenderer {
         this.renderOutMove();
     }
 
-    setMove(heroInfo: heroInfo, position: {x: number, y: number}) {
+    setMove(hero: Hero, position: {x: number, y: number}) {
         const ctx = this.moveCanvas.getContext('2d');
         if (!ctx) return;
         
@@ -108,7 +108,27 @@ class HeroRenderer {
     }
 
     requestDrawHero(ctx: CanvasRenderingContext2D, hero: Hero|null, position: {x: number; y: number}) {
-        ctx.strokeRect(position.x - heroSize / 2, position.y - heroSize / 2, heroSize, heroSize);
+        let x = position.x - heroSize / 2;
+        let y = position.y - heroSize / 2;
+        ctx.strokeRect(x, y, heroSize, heroSize);
+        ctx.fillStyle = 'white';
+        ctx.fillRect(x, y, heroSize, heroSize);
+        this.outHeroCanvas.forEach(canvas => {
+            const ctx = canvas.getContext('2d');
+            if (!ctx || !this.heroCtx) return;
+
+            ctx.putImageData(this.heroCtx.getImageData(
+                x - 1, y - 1, heroSize + 2, heroSize + 2
+            ), x - 1, y - 1);
+        });
+    }
+
+    isHitHero(x: number, y: number): Hero|null {
+        let heroInfo = isHitHeroPosition(x, y);
+        if (!heroInfo) return null;
+        let maybeHero = (heroInfo.stage === 'on' ? this.currentOnStageHero : this.currentOffStageHero)[heroInfo.index];
+        if (!maybeHero) return null;
+        return maybeHero;
     }
 }
 

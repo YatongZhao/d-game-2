@@ -17,7 +17,8 @@ const render = () => {
     }
     draw(frame);
     port1.postMessage({
-        HP: frame.HP
+        HP: frame.HP,
+        roundNumber: frame.roundNumber,
     });
     heroRenderer.setHero({
         onStageHero: frame.onStageHero,

@@ -3,6 +3,14 @@ import { Bullet } from './Bullet';
 import type { Game } from './Game';
 import { GrapeshotBullet } from './GrapeshotBullet';
 
+export type heroCopy = {
+    level: number;
+    killNumber: number;
+    id: string;
+    x: number;
+    y: number;
+}
+
 export class Hero {
     level = 1;
     killNumber = 0;

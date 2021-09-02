@@ -10,7 +10,7 @@ export class GrapeshotBullet extends Bullet {
     y = 0;
     size = 3;
     direction = 0;
-    speed = 30;
+    speed = 200;
     ATK = 10;
 
     isDied = false;
@@ -23,7 +23,18 @@ export class GrapeshotBullet extends Bullet {
         this.y = this.hero.y + battleGroundDistance;
         this.direction = Math.PI*0.4*(Math.random() - 0.5);
         this.direction === 0 && (this.direction = Math.PI*0.1);
-        this.speed = 120 + Math.floor(Math.random() * 120);
+        this.speed = 300 + Math.floor(Math.random() * 300);
+    }
+
+    copy() {
+        return {
+            x: this.x, y: this.y,
+            size: this.size,
+            direction: this.direction,
+            speed: this.speed,
+            ATK: this.ATK,
+            isDied: this.isDied,
+        }
     }
 
     go() {

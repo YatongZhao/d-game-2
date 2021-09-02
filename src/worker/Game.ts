@@ -1,22 +1,23 @@
 import type { Bullet } from "./Bullet";
 import { BulletSet } from "./BulletSet";
-import type { EnemySet } from "./EnemySet";
+import type { EnemySet, enemySetCopy } from "./EnemySet";
 import { FrameCounter } from "./frameCounter";
-import type { Hero } from "./Hero";
+import type { Hero, heroCopy } from "./Hero";
 import { HeroSet } from "./HeroSet";
 import { Round } from "./Round";
 
 export class Game {
     heroSet = new HeroSet(this);
     bulletSet = new BulletSet();
-    currentRound = new Round(this);
+    currentRound = new Round(this, 1);
     frameCounter = new FrameCounter();
     frameBuffer: {
         HP: number;
-        enemys: EnemySet;
-        onStageHero: (Hero|null)[];
-        offStageHero: (Hero|null)[];
-        bullets: Bullet[];
+        enemys: enemySetCopy;
+        onStageHero: (heroCopy|null)[];
+        offStageHero: (heroCopy|null)[];
+        bullets: any[];
+        roundNumber: number;
     }[] = [];
     requestPushFrame = false;
 
@@ -41,10 +42,11 @@ export class Game {
     produceFrame() {
         this.frameBuffer.push({
             HP: this.HP,
-            enemys: this.currentRound.enemySet,
-            onStageHero: this.heroSet.onStageHero,
-            offStageHero: this.heroSet.offStageHero,
-            bullets: this.bulletSet.bullets,
+            enemys: this.currentRound.enemySet.copy(),
+            onStageHero: this.heroSet.copyOnStageHero(),
+            offStageHero: this.heroSet.copyOffStageHero(),
+            bullets: this.bulletSet.copy(),
+            roundNumber: this.currentRound.roundNumber,
         });
         if (this.requestPushFrame) {
             this.pushFrame();

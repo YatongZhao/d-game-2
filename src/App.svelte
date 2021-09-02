@@ -1,6 +1,6 @@
 <script lang="ts">
 import { onDestroy, onMount } from "svelte";
-import { battleGroundDistance, battleGroundHeight, battleGroundWidth, heroCanvasHeight, heroCanvasWidth, heroInfo, HPHeight, HPWidth, isHitHero } from "./const";
+import { battleGroundDistance, battleGroundHeight, battleGroundWidth, heroCanvasHeight, heroCanvasWidth, heroInfo, HPHeight, HPWidth } from "./const";
 import { setCanvas } from "./draw";
 import { setBulletCanvas } from "./draw/drawBullet";
 import { heroRenderer } from "./draw/drawHero";
@@ -9,11 +9,13 @@ import { game } from "./game";
 import Hero from "./Hero.svelte";
 import { port2 } from "./messageChannel";
 import Shop from "./Shop.svelte";
+import type { Hero as HeroType } from './worker/Hero';
 
     let canvas: HTMLCanvasElement;
     let HPCanvas: HTMLCanvasElement;
     let bulletCanvas: HTMLCanvasElement;
 	let HP = 0;
+	let roundNumber = 1;
 	let showShop = false;
 	
 	let width = window.innerWidth;
@@ -25,12 +27,13 @@ import Shop from "./Shop.svelte";
 	let heroTop = 0;
 
 	let showHeroShadow = false;
-	let heroInfoIns: heroInfo;
+	let hitedHero: HeroType;
 	let heroTouchX = 0;
 	let heroTouchY = 0;
 	
 	function handleMessage(msg: MessageEvent) {
 		HP = msg.data.HP;
+		roundNumber = msg.data.roundNumber;
 		setHP(HP);
 	}
 
@@ -59,7 +62,7 @@ import Shop from "./Shop.svelte";
 		let x = e.touches[0].clientX;
 		let y = e.touches[0].clientY;
 		getHeroTouchPosition(x, y);
-		heroRenderer.setMove(heroInfoIns, { x: heroTouchX, y: heroTouchY });
+		heroRenderer.setMove(hitedHero, { x: heroTouchX, y: heroTouchY });
 	}
 
 	onMount(() => {
@@ -107,19 +110,19 @@ import Shop from "./Shop.svelte";
 	}
 
 	function handleTouchStart(event: TouchEvent) {
-        event.preventDefault();
-        event.stopPropagation();
 		let x = event.touches[0].clientX;
 		let y = event.touches[0].clientY;
 		let pos = getHeroTouchPosition(x, y);
 		x = pos.x;
 		y = pos.y;
-		let _heroInfo = isHitHero(x, y);
-		if (_heroInfo) {
+		let _hitedHero = heroRenderer.isHitHero(x, y);
+		if (_hitedHero) {
+			event.preventDefault();
+			event.stopPropagation();
 			showHeroShadow = true;
-			heroInfoIns = _heroInfo;
+			hitedHero = _hitedHero;
 			window.addEventListener('touchmove', handleHeroTouchMove, { passive: false });
-			heroRenderer.setMove(heroInfoIns, { x, y });
+			heroRenderer.setMove(hitedHero, { x, y });
 		}
 	}
 </script>
@@ -147,6 +150,7 @@ import Shop from "./Shop.svelte";
 	{#if showShop}
 		<Shop />
 	{/if}
+	<div class="round-number">{roundNumber}</div>
 </main>
 
 <style>
@@ -235,5 +239,8 @@ import Shop from "./Shop.svelte";
 		z-index: 1001;
 		bottom: 19%;
         right: 5%;
+	}
+	.round-number {
+		font-size: 30px;
 	}
 </style>

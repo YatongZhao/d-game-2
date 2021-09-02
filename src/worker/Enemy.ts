@@ -11,12 +11,23 @@ export class Enemy {
         this.index = index;
     }
 
+    copy() {
+        return {
+            value: this.value,
+            index: this.index,
+        }
+    }
+
     hited(atk: number) {
         let _atk = this.value < atk ? this.value : atk;
         this.game.score += _atk;
         this.value -= _atk;
 
-        return this.value <= 0;
+        let isKilled = this.value <= 0;
+        if (isKilled) {
+            this.game.currentRound.enemySet.aliveEnemyNumber--;
+        }
+        return isKilled;
     }
 }
 

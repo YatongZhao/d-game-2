@@ -14,8 +14,8 @@ export function drawBullet(bullets: GrapeshotBullet[]) {
 
         ctx.beginPath();
         ctx.moveTo(x, y);
-        const dx = Math.round(Math.sin(direction) * speed / 2);
-        const dy = Math.round(Math.cos(direction) * speed / 2);
+        const dx = Math.round(Math.sin(direction) * speed / 5);
+        const dy = Math.round(Math.cos(direction) * speed / 5);
         ctx.lineTo(x - dx, y + dy);
         let gnt1 = ctx.createLinearGradient(x, y, x - dx, y + dy);
         gnt1.addColorStop(0,'red');

@@ -2,12 +2,19 @@ import { battleGroundDistance, enemyColumn, enemyRow, enemySize, enemyXSpace, en
 import { Enemy, EnemyQueue } from "./Enemy";
 import type { Round } from "./Round";
 
+export type enemySetCopy = {
+    enemys: ({ index: number; value: number; }|null)[];
+    aliveEnemyNumber: number;
+    lengthTraveled: number;
+}
+
 export class EnemySet {
+    static initSpeed = 3;
     enemys: Enemy[] = [];
     aliveEnemyNumber = 0;
     enemyOnGroundQueue: EnemyQueue|null = null;
-    lengthTraveled = 300;
-    speed = 2;
+    lengthTraveled = -enemySize - 2;
+    speed = EnemySet.initSpeed;
     endLineIndex = 0;
     round: Round;
 
@@ -16,10 +23,18 @@ export class EnemySet {
         this.prepareEnemySet();
     }
 
+    copy() {
+        return {
+            enemys: this.enemys.map(enemy => enemy && enemy.copy()),
+            aliveEnemyNumber: this.aliveEnemyNumber,
+            lengthTraveled: this.lengthTraveled,
+        }
+    }
+
     prepareEnemySet() {
         let enemys: Enemy[] = [];
         for (let i = 0; i < 450; i++) {
-            enemys.push(new Enemy(this.round.game, Math.ceil(Math.random() * 10), i));
+            enemys.push(new Enemy(this.round.game, Math.ceil(Math.random() * (10 + 2 * this.round.roundNumber)), i));
         }
 
         this.enemys = enemys;
@@ -52,10 +67,10 @@ export class EnemySet {
 
         while (this.enemyOnGroundQueue && this.enemyOnGroundQueue.enemy.index < targetIndex) {
             let value = this.enemyOnGroundQueue.enemy.value;
+            value && this.aliveEnemyNumber--;
             this.round.game.HP -= value;
             this.round.game.HP < 0 && (this.round.game.HP = 0);
             this.enemyOnGroundQueue.enemy.value = 0;
-            this.aliveEnemyNumber--;
             this.enemyOnGroundQueue = this.enemyOnGroundQueue.next;
         }
     }
