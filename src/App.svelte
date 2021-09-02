@@ -1,21 +1,34 @@
 <script lang="ts">
-import { onMount } from "svelte";
-import { battleGroundDistance, battleGroundHeight, battleGroundWidth, heroCanvasHeight, heroCanvasWidth, HPHeight, HPWidth } from "./const";
+import { onDestroy, onMount } from "svelte";
+import { battleGroundDistance, battleGroundHeight, battleGroundWidth, heroCanvasHeight, heroCanvasWidth, heroInfo, HPHeight, HPWidth, isHitHero } from "./const";
 import { setCanvas } from "./draw";
 import { setBulletCanvas } from "./draw/drawBullet";
-import { setHeroCanvas } from "./draw/drawHero";
+import { heroRenderer } from "./draw/drawHero";
 import { setHP, setHPCanvas } from "./draw/drawHP";
 import { game } from "./game";
+import Hero from "./Hero.svelte";
 import { port2 } from "./messageChannel";
 import Shop from "./Shop.svelte";
 
     let canvas: HTMLCanvasElement;
     let HPCanvas: HTMLCanvasElement;
-    let heroCanvas: HTMLCanvasElement;
     let bulletCanvas: HTMLCanvasElement;
 	let HP = 0;
 	let showShop = false;
+	
+	let width = window.innerWidth;
+	let height = window.innerHeight;
+	let ratio = height / width;
+	
+	let heroSec: HTMLDivElement;
+	let heroLeft = 0;
+	let heroTop = 0;
 
+	let showHeroShadow = false;
+	let heroInfoIns: heroInfo;
+	let heroTouchX = 0;
+	let heroTouchY = 0;
+	
 	function handleMessage(msg: MessageEvent) {
 		HP = msg.data.HP;
 		setHP(HP);
@@ -25,7 +38,37 @@ import Shop from "./Shop.svelte";
 		showShop = !showShop;
 	}
 
+	function handleRem() {
+		width = window.innerWidth;
+		height = window.innerHeight;
+		ratio = height / width;
+
+		heroLeft = heroSec.offsetLeft;
+		heroTop = heroSec.offsetTop;
+	};
+
+	function handleHeroTouchEnd() {
+		showHeroShadow = false;
+		heroRenderer.clearOutMove();
+		window.removeEventListener('touchmove', handleHeroTouchMove);
+	}
+
+	function handleHeroTouchMove(e: TouchEvent) {
+        e.preventDefault();
+        e.stopPropagation();
+		let x = e.touches[0].clientX;
+		let y = e.touches[0].clientY;
+		getHeroTouchPosition(x, y);
+		heroRenderer.setMove(heroInfoIns, { x: heroTouchX, y: heroTouchY });
+	}
+
 	onMount(() => {
+		window.addEventListener('resize', handleRem);
+		window.addEventListener('touchend', handleHeroTouchEnd);
+
+		heroLeft = heroSec.offsetLeft;
+		heroTop = heroSec.offsetTop;
+
 		canvas.width = battleGroundWidth;
 		canvas.height = battleGroundDistance;
 		setCanvas(canvas);
@@ -34,21 +77,63 @@ import Shop from "./Shop.svelte";
 		HPCanvas.height = HPHeight;
 		setHPCanvas(HPCanvas);
 
-		heroCanvas.width = heroCanvasWidth;
-		heroCanvas.height = heroCanvasHeight;
-		setHeroCanvas(heroCanvas);
-
 		bulletCanvas.width = battleGroundWidth;
 		bulletCanvas.height = battleGroundHeight;
 		setBulletCanvas(bulletCanvas);
 
 		port2.onmessage = handleMessage;
 	});
+
+	onDestroy(() => {
+		window.removeEventListener('resize', handleRem);
+		window.removeEventListener('touchend', handleHeroTouchEnd);
+	});
+
+	function getHeroTouchPosition(x: number, y: number) {
+		let _ratio;
+		if (ratio > 2) {
+			_ratio = width / battleGroundWidth;
+			y -= height / 2 - width + battleGroundDistance * _ratio;
+		} else {
+			_ratio = height / battleGroundHeight;
+			y -= battleGroundDistance * _ratio;
+			x -= (width - height / 2) / 2;
+		}
+		y /= _ratio;
+		x /= _ratio;
+		heroTouchY = y;
+		heroTouchX = x;
+		return {x, y};
+	}
+
+	function handleTouchStart(event: TouchEvent) {
+        event.preventDefault();
+        event.stopPropagation();
+		let x = event.touches[0].clientX;
+		let y = event.touches[0].clientY;
+		let pos = getHeroTouchPosition(x, y);
+		x = pos.x;
+		y = pos.y;
+		let _heroInfo = isHitHero(x, y);
+		if (_heroInfo) {
+			showHeroShadow = true;
+			heroInfoIns = _heroInfo;
+			window.addEventListener('touchmove', handleHeroTouchMove, { passive: false });
+			heroRenderer.setMove(heroInfoIns, { x, y });
+		}
+	}
 </script>
 
-<main>
+<main style={`width:${ratio > 2 ? width+'px' : height/2+'px'};height:${ratio > 2 ? width*2+'px' : height+'px'}`}>
 	<canvas class="enemy-canvas" bind:this={canvas} />
-	<canvas class="hero-canvas" bind:this={heroCanvas} />
+	<div class="hero-canvas" bind:this={heroSec}>
+		<Hero />
+	</div>
+	{#if showHeroShadow}
+	<div class="hero-shadow">
+		<Hero />
+	</div>
+	{/if}
 	<canvas class="bullet-canvas" bind:this={bulletCanvas} />
 	<div class="hp-box">
 		<canvas class="hp-canvas" bind:this={HPCanvas} />
@@ -56,7 +141,7 @@ import Shop from "./Shop.svelte";
 	</div>
 	<div class="event-mask" on:click={() => {
 		showShop = false;
-	}}></div>
+	}} on:touchstart={handleTouchStart}></div>
 	<button on:click={() => game.startFighting()} class="battle-btn">开始战斗</button>
 	<button on:click={handleShow} class="main-btn">商店</button>
 	{#if showShop}
@@ -67,36 +152,48 @@ import Shop from "./Shop.svelte";
 <style>
 	main {
 		overflow: hidden;
+		position: fixed;
+		left: 50%;
+		top: 50%;
+		transform: translate3d(-50%, -50%, 0);
+		background-color: white;
 	}
 	.enemy-canvas {
-		width: 100vw;
-		position: fixed;
-		bottom: 32vw;
+		width: 100%;
+		position: absolute;
 		left: 0;
 		z-index: 1;
 	}
 	.bullet-canvas {
-		width: 100vw;
-		position: fixed;
+		width: 100%;
+		position: absolute;
 		bottom: 0;
 		left: 0;
 		z-index: 2;
 	}
 	.hero-canvas {
-		width: 100vw;
-		position: fixed;
-		bottom: -1px;
+		width: 100%;
+		position: absolute;
+		bottom: 0;
 		left: 0;
-		background-color: gainsboro;
+		background-color: ghostwhite;
 		box-shadow: 0px -2px 1px 1px burlywood;
-		border-top: 1px solid gray
+		border-top: 1px solid gray;
+	}
+	.hero-shadow {
+		width: 100%;
+		background-color: ghostwhite;
+		position: absolute;
+		bottom: 20%;
+		left: 0;
+		z-index: 10000;
 	}
 	.hp-box {
-		position: fixed;
-		top: 2vw;
+		position: absolute;
+		top: 2%;
 		left: 0;
-		width: 100vw;
-		height: 3.8vw;
+		width: 100%;
+		height: 1.9%;
 		z-index: 5;
 		opacity: .8;
 	}
@@ -104,8 +201,8 @@ import Shop from "./Shop.svelte";
 		background-color: #aaa;
 		box-sizing: border-box;
 		position: absolute;
-		width: 98vw;
-		left: 1vw;
+		width: 98%;
+		left: 1%;
 		border-radius: 3px;
 		border: 1px solid #333;
 		z-index: -1;
@@ -116,27 +213,27 @@ import Shop from "./Shop.svelte";
 		color: white;
 		position: absolute;
 		left: 50%;
-		transform: translateX(-50%);
+		top: 50%;
+		transform: translate3d(-50%, -50%, 0);
 		text-align: center;
-		line-height: 3.8vw;
-		bottom: 0;
+		height: 100%;
 	}
 	.event-mask {
-		position: fixed;
-		width: 100vw;
-		height: 100vh;
+		position: absolute;
+		width: 100%;
+		height: 100%;
 		z-index: 1000;
 	}
     .main-btn {
-        position: fixed;
+        position: absolute;
 		z-index: 1001;
-		bottom: 38vw;
-        right: 2vw;
+		bottom: 19%;
+        right: 2%;
     }
 	.battle-btn {
-        position: fixed;
+        position: absolute;
 		z-index: 1001;
-		bottom: 38vw;
-        right: 5vw;
+		bottom: 19%;
+        right: 5%;
 	}
 </style>

@@ -11,7 +11,7 @@ export class GrapeshotBullet extends Bullet {
     size = 3;
     direction = 0;
     speed = 30;
-    ATK = 1;
+    ATK = 10;
 
     isDied = false;
 

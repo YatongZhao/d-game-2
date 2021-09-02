@@ -1,7 +1,7 @@
 import { game } from './game';
 import { draw } from './draw';
 import { port1 } from './messageChannel';
-import { setHero } from './draw/drawHero';
+import { heroRenderer } from './draw/drawHero';
 import { drawBullet } from './draw/drawBullet';
 
 let stack: {}[] = [];
@@ -19,7 +19,7 @@ const render = () => {
     port1.postMessage({
         HP: frame.HP
     });
-    setHero({
+    heroRenderer.setHero({
         onStageHero: frame.onStageHero,
         offStageHero: frame.offStageHero,
     });

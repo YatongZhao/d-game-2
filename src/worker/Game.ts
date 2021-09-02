@@ -39,16 +39,6 @@ export class Game {
     }
 
     produceFrame() {
-        // self.postMessage({
-        //     type: 'PUSH_FRAME',
-        //     frame: {
-        //         HP: this.HP,
-        //         enemys: this.currentRound.enemySet,
-        //         onStageHero: this.heroSet.onStageHero,
-        //         offStageHero: this.heroSet.offStageHero,
-        //         bullets: this.bulletSet.bullets,
-        //     },
-        // });
         this.frameBuffer.push({
             HP: this.HP,
             enemys: this.currentRound.enemySet,

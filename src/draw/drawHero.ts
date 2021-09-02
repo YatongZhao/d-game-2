@@ -1,41 +1,115 @@
-import { HPHeight, HPWidth, offStageHeroPosition, onStageHeroPosition } from "../const";
+import { heroCanvasHeight, heroCanvasWidth, heroInfo, heroSize, HPHeight, HPWidth, offStageHeroPosition, onStageHeroPosition } from "../const";
 import type { Hero } from "../worker/Hero";
 
-let heroCanvas: HTMLCanvasElement;
-export const setHeroCanvas = (_canvas: HTMLCanvasElement) => heroCanvas = _canvas;
+class HeroRenderer {
+    heroCanvas: HTMLCanvasElement = document.createElement('canvas');
+    heroCtx = this.heroCanvas.getContext('2d');
+    moveCanvas: HTMLCanvasElement = document.createElement('canvas');
+    moveCtx = this.moveCanvas.getContext('2d');
 
-const currentOnStageHero: (Hero|null)[] = [null, null, null, null, null, null, null, null, null];
-const currentOffStageHero: (Hero|null)[] = [null, null, null, null, null, null, null, null, null];
+    outHeroCanvas: HTMLCanvasElement[] = [];
+    outMoveCanvas: HTMLCanvasElement[] = [];
 
-export const setHero = ({ onStageHero, offStageHero }: {
-    onStageHero: (Hero|null)[];
-    offStageHero: (Hero|null)[];
-}) => {
-    diffHero(currentOffStageHero, offStageHero, 'off');
-    diffHero(currentOnStageHero, onStageHero, 'on');
-}
+    currentOnStageHero: (Hero|null)[] = [null, null, null, null, null, null, null, null, null];
+    currentOffStageHero: (Hero|null)[] = [null, null, null, null, null, null, null, null, null];
 
-const diffHero = (currentHero: (Hero|null)[], inHero: (Hero|null)[], stage: 'on'|'off') => {
-    currentHero.forEach((hero, i) => {
-        let _hero = inHero[i];
-        if (!hero && !_hero) return;
-        if (hero && _hero
-            && hero.id === _hero.id
-            && hero.killNumber === _hero.killNumber
-            && hero.level === _hero.level) return;
+    constructor() {
+        this.heroCanvas.width = heroCanvasWidth;
+        this.heroCanvas.height = heroCanvasHeight;
+        this.moveCanvas.width = heroCanvasWidth;
+        this.moveCanvas.height = heroCanvasHeight;
+    }
+
+    addOutHeroCanvas(canvas: HTMLCanvasElement) {
+        this.outHeroCanvas.push(canvas);
+        this.renderOutHero();
+    }
+
+    removeOutHeroCanvas(canvas: HTMLCanvasElement) {
+        this.outHeroCanvas = this.outHeroCanvas.filter(_canvas => _canvas !== canvas);
+    }
+
+    addOutMoveCanvas(canvas: HTMLCanvasElement) {
+        this.outMoveCanvas.push(canvas);
+        this.renderOutMove();
+    }
+
+    removeOutMoveCanvas(canvas: HTMLCanvasElement) {
+        this.outMoveCanvas = this.outMoveCanvas.filter(_canvas => _canvas !== canvas);
+    }
+
+    renderOutHero() {
+        this.outHeroCanvas.forEach(canvas => {
+            const ctx = canvas.getContext('2d');
+            if (!ctx || !this.heroCtx) return;
+
+            ctx.putImageData(this.heroCtx.getImageData(
+                0, 0, heroCanvasWidth, heroCanvasHeight
+            ), 0, 0);
+        });
+    }
+
+    setHero({ onStageHero, offStageHero }: {
+        onStageHero: (Hero|null)[];
+        offStageHero: (Hero|null)[];
+    }) {
+        this.diffHero(this.currentOffStageHero, offStageHero, 'off');
+        this.diffHero(this.currentOnStageHero, onStageHero, 'on');
+
+        this.renderOutHero();
+    }
+
+    renderOutMove() {
+        this.outMoveCanvas.forEach(canvas => {
+            const ctx = canvas.getContext('2d');
+            if (!ctx || !this.moveCtx) return;
+
+            ctx.putImageData(this.moveCtx.getImageData(
+                0, 0, heroCanvasWidth, heroCanvasHeight
+            ), 0, 0);
+        });
+    }
+
+    clearOutMove() {
+        const ctx = this.moveCanvas.getContext('2d');
+        if (!ctx) return;
         
-        currentHero[i] = _hero;
-        requestDrawHero(_hero, stage, i);
-    });
+        ctx.clearRect(0, 0, heroCanvasWidth, heroCanvasHeight);
+        this.renderOutMove();
+    }
+
+    setMove(heroInfo: heroInfo, position: {x: number, y: number}) {
+        const ctx = this.moveCanvas.getContext('2d');
+        if (!ctx) return;
+        
+        ctx.clearRect(0, 0, heroCanvasWidth, heroCanvasHeight);
+        this.requestDrawHero(ctx, null, position);
+
+        this.renderOutMove();
+    }
+
+    diffHero(currentHero: (Hero|null)[], inHero: (Hero|null)[], stage: 'on'|'off') {
+        const ctx = this.heroCanvas.getContext('2d');
+        if (!ctx) return;
+    
+        currentHero.forEach((hero, i) => {
+            let _hero = inHero[i];
+            if (!hero && !_hero) return;
+            if (hero && _hero
+                && hero.id === _hero.id
+                && hero.killNumber === _hero.killNumber
+                && hero.level === _hero.level) return;
+            
+            currentHero[i] = _hero;
+            let position = (stage === 'on' ? onStageHeroPosition : offStageHeroPosition)[i];
+            ctx.clearRect(position.x - heroSize / 2, position.y - heroSize / 2, heroSize, heroSize);
+            this.requestDrawHero(ctx, _hero, position);
+        });
+    }
+
+    requestDrawHero(ctx: CanvasRenderingContext2D, hero: Hero|null, position: {x: number; y: number}) {
+        ctx.strokeRect(position.x - heroSize / 2, position.y - heroSize / 2, heroSize, heroSize);
+    }
 }
 
-const requestDrawHero = (hero: Hero|null, stage: 'on'|'off', index: number) => {
-    let position = (stage === 'on' ? onStageHeroPosition : offStageHeroPosition)[index];
-
-    const ctx = heroCanvas.getContext('2d');
-    if (!ctx) return;
-
-    ctx.strokeRect(position.x - 40, position.y - 40, 80, 80);
-    ctx.stroke();
-}
-
+export const heroRenderer = new HeroRenderer();
