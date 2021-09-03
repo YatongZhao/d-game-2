@@ -1,13 +1,14 @@
 <script lang="ts">
 import { onDestroy, onMount } from "svelte";
 import { fly } from "svelte/transition";
-import { battleGroundDistance, battleGroundHeight, battleGroundWidth, heroCanvasHeight, heroCanvasWidth, heroInfo, heroInfoSet, HPHeight, HPWidth } from "./const";
+import { battleGroundDistance, battleGroundHeight, battleGroundWidth, heroCanvasHeight, heroCanvasWidth, heroInfo, heroInfoSet, HPHeight, HPWidth, init$, initHP } from "./const";
 import { setCanvas } from "./draw";
 import { setBulletCanvas } from "./draw/drawBullet";
 import { heroRenderer } from "./draw/drawHero";
 import { setHP, setHPCanvas } from "./draw/drawHP";
 import { game } from "./game";
 import Hero from "./Hero.svelte";
+import { heroShop } from "./HeroShop";
 import { port2 } from "./messageChannel";
 import Shop from "./Shop.svelte";
 import type { currentTurn } from "./worker/Game";
@@ -16,7 +17,8 @@ import type { Hero as HeroType } from './worker/Hero';
     let canvas: HTMLCanvasElement;
     let HPCanvas: HTMLCanvasElement;
     let bulletCanvas: HTMLCanvasElement;
-	let HP = 0;
+	let HP = initHP;
+	let money = init$;
 	let roundNumber = 1;
 	let showShop = false;
 	let currentTurn: currentTurn = 'STRATEGY_TURN';
@@ -38,6 +40,8 @@ import type { Hero as HeroType } from './worker/Hero';
 		HP = msg.data.HP;
 		roundNumber = msg.data.roundNumber;
 		currentTurn = msg.data.currentTurn;
+		heroShop.set$(msg.data.$);
+		money = heroShop.get$();
 		setHP(HP);
 	}
 
@@ -96,6 +100,12 @@ import type { Hero as HeroType } from './worker/Hero';
 		bulletCanvas.height = battleGroundHeight;
 		setBulletCanvas(bulletCanvas);
 
+		let setCosted$ = heroShop.setCosted$.bind(heroShop);
+		heroShop.setCosted$ = function($: number) {
+			setCosted$($);
+			money = heroShop.get$();
+		}
+
 		port2.onmessage = handleMessage;
 	});
 
@@ -149,17 +159,19 @@ import type { Hero as HeroType } from './worker/Hero';
 	</div>
 	{/if}
 	<canvas class="bullet-canvas" bind:this={bulletCanvas} />
-	<div class="hp-box">
+	<div class:h={ratio > 2} class:w={ratio <= 2} class="hp-box">
 		<canvas class="hp-canvas" bind:this={HPCanvas} />
 		<span class="hp-span">{HP}/1000</span>
 	</div>
 	<div class="event-mask" on:click={() => {
 		showShop = false;
 	}} on:touchstart={handleTouchStart}></div>
-	<button on:click={() => game.startFighting()} class="battle-btn">开始战斗</button>
-	<button on:click={handleShow} class="main-btn">商店</button>
+	<button class:h={ratio > 2} class:w={ratio <= 2}
+		disabled={currentTurn === 'BATTLE_TURN'}
+		on:click={() => game.startFighting()} class="battle-btn">开始战斗</button>
+	<button class:h={ratio > 2} class:w={ratio <= 2} on:click={handleShow} class="main-btn">商店</button>
 	{#if showShop}
-		<Shop ratio={ratio} />
+		<Shop ratio={ratio} money={money} />
 	{/if}
 	<div class:h={ratio > 2} class:w={ratio <= 2} class="round-number">
 		Round
@@ -167,6 +179,7 @@ import type { Hero as HeroType } from './worker/Hero';
 			<span in:fly={{ y: -40 }} out:fly={{ y: 80 }}>{roundNumber}</span>
 		{/key}
 	</div>
+	<div class:h={ratio > 2} class:w={ratio <= 2} class="money">${money}</div>
 </main>
 
 <style lang="scss">
@@ -210,12 +223,32 @@ import type { Hero as HeroType } from './worker/Hero';
 	}
 	.hp-box {
 		position: absolute;
-		top: 2%;
 		left: 0;
 		width: 100%;
-		height: 1.9%;
 		z-index: 5;
 		opacity: .8;
+		.hp-span {
+			color: white;
+			position: absolute;
+			left: 50%;
+			top: 50%;
+			transform: translate3d(-50%, -50%, 0);
+			text-align: center;
+		}
+		&.h {
+			bottom: 32vw;
+			height: 4vw;
+			.hp-span {
+				font-size: 3vw;
+			}
+		}
+		&.w {
+			bottom: 16vh;
+			height: 2vh;
+			.hp-span {
+				font-size: 1.5vh;
+			}
+		}
 	}
 	.hp-canvas {
 		background-color: #aaa;
@@ -228,16 +261,6 @@ import type { Hero as HeroType } from './worker/Hero';
 		z-index: -1;
 		height: 100%;
 	}
-	.hp-span {
-		font-size: 12px;
-		color: white;
-		position: absolute;
-		left: 50%;
-		top: 50%;
-		transform: translate3d(-50%, -50%, 0);
-		text-align: center;
-		height: 100%;
-	}
 	.event-mask {
 		position: absolute;
 		width: 100%;
@@ -247,19 +270,32 @@ import type { Hero as HeroType } from './worker/Hero';
     .main-btn {
         position: absolute;
 		z-index: 1001;
-		bottom: 17%;
-        left: 2%;
+		border-radius: 5px;
+		&.h {
+			bottom: 37vw;
+			left: 1vw;
+		}
+		&.w {
+			bottom: 18.5vh;
+			left: 0.5vh;
+		}
     }
 	.battle-btn {
         position: absolute;
+		border-radius: 5px;
 		z-index: 1001;
-		bottom: 17%;
-        right: 2%;
+		&.h {
+			bottom: 37vw;
+			right: 1vw;
+		}
+		&.w {
+			bottom: 18.5vh;
+			right: 0.5vh;
+		}
 	}
 	.round-number {
 		position: absolute;
-		left: 50%;
-		transform: translate3d(-50%, 0, 0);
+		left: 0;
 		top: 40%;
 		font-weight: 100;
 		color: darkcyan;
@@ -283,6 +319,22 @@ import type { Hero as HeroType } from './worker/Hero';
 				font-size: 7vh;
 			}
 		}
-		
+	}
+	.money {
+		position: absolute;
+		z-index: 10000;
+		text-shadow: 3px 5px 1px rgba(0, 0, 0, .2);
+		color: brown;
+		font-weight: 900;
+		&.h {
+			font-size: 6vw;
+			top: 8vw;
+			right: 8vw;
+		}
+		&.w {
+			font-size: 3vh;
+			top: 4vh;
+			right: 4vh;
+		}
 	}
 </style>

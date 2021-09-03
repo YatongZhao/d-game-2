@@ -28,12 +28,12 @@ export const drawHP = () => {
     const HPCtx = HPCanvas.getContext('2d');
     if (!HPCtx) return;
     HPCtx.clearRect(0, 0, HPWidth, HPHeight);
-    HPCtx.fillStyle = 'lightgreen';
+    HPCtx.fillStyle = 'cyan';
     HPCtx.fillRect(
         HPWidth - renderHP, 0, renderHP, HPHeight
     );
     HPCtx.stroke();
-    HPCtx.fillStyle = 'green';
+    HPCtx.fillStyle = 'darkcyan';
     HPCtx.fillRect(
         HPWidth - HP, 0, HP, HPHeight
     );

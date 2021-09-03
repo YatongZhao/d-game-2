@@ -1,3 +1,4 @@
+import { init$, initHP } from "../const";
 import type { Bullet } from "./Bullet";
 import { BulletSet } from "./BulletSet";
 import type { EnemySet, enemySetCopy } from "./EnemySet";
@@ -8,27 +9,36 @@ import { Round } from "./Round";
 
 export type currentTurn = 'BATTLE_TURN'|'STRATEGY_TURN';
 
+export type frame = {
+    currentTurn: currentTurn;
+    HP: number;
+    enemys: enemySetCopy;
+    onStageHero: (heroCopy|null)[];
+    offStageHero: (heroCopy|null)[];
+    bullets: any[];
+    roundNumber: number;
+    $: number;
+    heroSetOperationTime: number;
+}
+
 export class Game {
     heroSet = new HeroSet(this);
     bulletSet = new BulletSet();
     currentRound = new Round(this, 1);
     frameCounter = new FrameCounter();
-    frameBuffer: {
-        currentTurn: currentTurn;
-        HP: number;
-        enemys: enemySetCopy;
-        onStageHero: (heroCopy|null)[];
-        offStageHero: (heroCopy|null)[];
-        bullets: any[];
-        roundNumber: number;
-    }[] = [];
+    frameBuffer: frame[] = [];
     requestPushFrame = false;
 
     currentTurn: currentTurn = 'STRATEGY_TURN';
 
-    HP = 1000;
-    $ = 500;
+    HP = initHP;
+    $ = init$;
     score = 0;
+
+    constructor() {
+        this.produceFrame();
+        this.pushFrame();
+    }
 
     toggleToBattleTurn() {
         if (this.currentTurn === 'BATTLE_TURN') return;
@@ -51,6 +61,8 @@ export class Game {
             offStageHero: this.heroSet.copyOffStageHero(),
             bullets: this.bulletSet.copy(),
             roundNumber: this.currentRound.roundNumber,
+            $: this.$,
+            heroSetOperationTime: this.heroSet.operationTime,
         });
         if (this.requestPushFrame) {
             this.pushFrame();

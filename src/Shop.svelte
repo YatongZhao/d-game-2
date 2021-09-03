@@ -1,9 +1,20 @@
 <script lang="ts">
+import { heroItem, heroShop } from "./HeroShop";
+
     export let ratio: number;
+    export let money: number;
+    let heroList: (heroItem|null)[] = heroShop.heroList;
 </script>
 
 <div class="container" class:h={ratio > 2} class:w={ratio <= 2}>
-    <button>霰弹</button>
+    {#each heroList as hero, i}
+        {#if hero}
+        <button disabled={money < hero.$} on:click={() => {
+            heroShop.buy(i);
+            heroList = heroShop.heroList;
+        }}>{hero.name}</button>
+        {/if}
+    {/each}
 </div>
 
 <style>

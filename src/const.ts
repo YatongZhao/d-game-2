@@ -17,6 +17,9 @@ export const enemyRow = 30;
 export const HPWidth = 1000;
 export const HPHeight = 36;
 
+export const initHP = 1000;
+export const init$ = 500;
+
 function createAverageList(width: number, num: number, space: number): number[] {
     let startSpace = (width - space * (num - 1)) / 2;
 

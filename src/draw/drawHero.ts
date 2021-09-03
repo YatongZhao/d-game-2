@@ -1,5 +1,5 @@
 import { heroCanvasHeight, heroCanvasWidth, heroInfo, heroInfoSet, heroSize, HPHeight, HPWidth, isHitHeroPosition, offStageHeroPosition, onStageHeroPosition } from "../const";
-import type { Hero } from "../worker/Hero";
+import type { Hero, heroCopy } from "../worker/Hero";
 
 class HeroRenderer {
     heroCanvas: HTMLCanvasElement = document.createElement('canvas');
@@ -50,8 +50,8 @@ class HeroRenderer {
     }
 
     setHero({ onStageHero, offStageHero }: {
-        onStageHero: (Hero|null)[];
-        offStageHero: (Hero|null)[];
+        onStageHero: (heroCopy|null)[];
+        offStageHero: (heroCopy|null)[];
     }) {
         this.diffHero(this.currentOffStageHero, offStageHero, 'off');
         this.diffHero(this.currentOnStageHero, onStageHero, 'on');
@@ -88,7 +88,7 @@ class HeroRenderer {
         this.renderOutMove();
     }
 
-    diffHero(currentHero: (Hero|null)[], inHero: (Hero|null)[], stage: 'on'|'off') {
+    diffHero(currentHero: (heroCopy|null)[], inHero: (heroCopy|null)[], stage: 'on'|'off') {
         const ctx = this.heroCanvas.getContext('2d');
         if (!ctx) return;
     
@@ -107,7 +107,7 @@ class HeroRenderer {
         });
     }
 
-    requestDrawHero(ctx: CanvasRenderingContext2D, hero: Hero|null, position: {x: number; y: number}) {
+    requestDrawHero(ctx: CanvasRenderingContext2D, hero: heroCopy|null, position: {x: number; y: number}) {
         let x = position.x - heroSize / 2;
         let y = position.y - heroSize / 2;
         if (hero) {

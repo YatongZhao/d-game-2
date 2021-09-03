@@ -1,10 +1,17 @@
 import { offStageHeroPosition, onStageHeroPosition } from "../const";
 import type { Game } from "./Game";
-import { GrapeshotHero, Hero, heroCopy } from "./Hero";
+import { GrapeshotHero } from "./GrapeshotHero";
+import type { Hero, heroCopy } from "./Hero";
 
 export type heroPos = {
     stage: 'on'|'off';
     index: number;
+}
+
+export type heroType = 'grapeshotHero';
+
+export function findAddHeroIndex(offStageHero: (any|null)[]): number {
+    return offStageHero.findIndex(hero => !hero);
 }
 
 export class HeroSet {
@@ -12,6 +19,7 @@ export class HeroSet {
     offStageHero: (Hero|null)[] = [null, null, null, null, null, null, null, null, null];
     onStageHero: (Hero|null)[] = [null, null, null, null, null, null, null, null, null];
     onStageNotNullHero: Hero[] = [];
+    operationTime = 0;
     get canBuyNumber() {
         return this.offStageHero.filter(hero => !hero).length;
     }
@@ -60,10 +68,15 @@ export class HeroSet {
         this.onStageNotNullHero.forEach(hero => hero.go());
     }
 
-    add() {
-        let index = this.offStageHero.findIndex(hero => !hero);
+    add(heroType: heroType) {
+        let index = findAddHeroIndex(this.offStageHero);
         let position = offStageHeroPosition[index];
-        this.offStageHero[index] = GrapeshotHero.fromPosition(this.game, position);
+        switch (heroType) {
+            case 'grapeshotHero':
+            default:
+                this.offStageHero[index] = GrapeshotHero.fromPosition(this.game, position);
+                break;
+        }
     }
 
     move(pos1: heroPos, pos2: heroPos) {

@@ -1,5 +1,5 @@
 import { Game } from './Game';
-import type { heroPos } from './HeroSet';
+import type { heroPos, heroType } from './HeroSet';
 const game = new Game();
 
 export const startFighting = async () => {
@@ -20,9 +20,19 @@ export const moveHero = async (pos1: heroPos, pos2: heroPos) => {
     }
 }
 
+export const buyHero = async (heroType: heroType) => {
+    game.heroSet.add(heroType);
+    game.heroSet.operationTime++;
+    if (game.currentTurn === 'STRATEGY_TURN') {
+        game.requestPushFrame = true;
+        game.produceFrame();
+    }
+}
+
 export default () => ({
     startFighting,
     addConsumedFrameNumber,
     moveHero,
+    buyHero,
     addEventListener: self.addEventListener,
 });

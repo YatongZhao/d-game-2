@@ -53,7 +53,7 @@ export class GrapeshotBullet extends Bullet {
             if (maybeEnemy) {
                 let isKilled = maybeEnemy.hited(this.ATK);
                 if (isKilled) {
-
+                    this.game.$++;
                 }
                 this.isDied = true;
                 return;

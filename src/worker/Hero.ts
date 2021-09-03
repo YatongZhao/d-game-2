@@ -38,22 +38,3 @@ export class Hero {
         this.y = position.y;
     }
 }
-
-export class GrapeshotHero extends Hero {
-    cycle = 5;
-    bulletNumber = 5;
-
-    static fromPosition(game: Game, position: {x: number, y: number}): GrapeshotHero {
-        let hero = new GrapeshotHero(game);
-        hero.setPosition(position);
-        return hero;
-    }
-
-    go() {
-        if (this.game.frameCounter.value % this.cycle === 0) {
-            for (let i = 0; i < this.bulletNumber; i++) {
-                this.game.bulletSet.add(new GrapeshotBullet(this.game, this));
-            }
-        }
-    }
-}
