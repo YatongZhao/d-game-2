@@ -158,12 +158,12 @@ import type { Hero as HeroType } from './worker/Hero';
 	<button on:click={() => game.startFighting()} class="battle-btn">开始战斗</button>
 	<button on:click={handleShow} class="main-btn">商店</button>
 	{#if showShop}
-		<Shop />
+		<Shop ratio={ratio} />
 	{/if}
-	<div class="round-number">{roundNumber}</div>
+	<div class:h={ratio > 2} class:w={ratio <= 2} class="round-number">Round {roundNumber}</div>
 </main>
 
-<style>
+<style lang="scss">
 	main {
 		overflow: hidden;
 		position: fixed;
@@ -251,6 +251,19 @@ import type { Hero as HeroType } from './worker/Hero';
         right: 2%;
 	}
 	.round-number {
-		font-size: 30px;
+		position: absolute;
+		left: 50%;
+		transform: translate3d(-50%, 0, 0);
+		top: 40%;
+		font-weight: 100;
+		color: darkcyan;
+		&.h {
+			width: 100vw;
+			font-size: 12vw;
+		}
+		&.w {
+			width: 50vh;
+			font-size: 6vh;
+		}
 	}
 </style>
