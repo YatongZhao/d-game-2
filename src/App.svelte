@@ -1,5 +1,6 @@
 <script lang="ts">
 import { onDestroy, onMount } from "svelte";
+import { fly } from "svelte/transition";
 import { battleGroundDistance, battleGroundHeight, battleGroundWidth, heroCanvasHeight, heroCanvasWidth, heroInfo, heroInfoSet, HPHeight, HPWidth } from "./const";
 import { setCanvas } from "./draw";
 import { setBulletCanvas } from "./draw/drawBullet";
@@ -160,7 +161,12 @@ import type { Hero as HeroType } from './worker/Hero';
 	{#if showShop}
 		<Shop ratio={ratio} />
 	{/if}
-	<div class:h={ratio > 2} class:w={ratio <= 2} class="round-number">Round {roundNumber}</div>
+	<div class:h={ratio > 2} class:w={ratio <= 2} class="round-number">
+		Round
+		{#key roundNumber}
+			<span in:fly={{ y: -40 }} out:fly={{ y: 80 }}>{roundNumber}</span>
+		{/key}
+	</div>
 </main>
 
 <style lang="scss">
@@ -257,13 +263,26 @@ import type { Hero as HeroType } from './worker/Hero';
 		top: 40%;
 		font-weight: 100;
 		color: darkcyan;
+		span {
+			position: absolute;
+			bottom: -5%;
+		}
 		&.h {
 			width: 100vw;
 			font-size: 12vw;
+			span {
+				margin-left: 4vw;
+				font-size: 14vw;
+			}
 		}
 		&.w {
 			width: 50vh;
 			font-size: 6vh;
+			span {
+				margin-left: 2vh;
+				font-size: 7vh;
+			}
 		}
+		
 	}
 </style>
