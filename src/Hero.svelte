@@ -71,13 +71,13 @@ import { heroRenderer } from "./draw/drawHero";
     .bottom-container {
         display: flex;
         justify-content: center;
-        margin-top: -1.7%;
+        margin-top: -1%;
     }
     .item {
         width: 5%;
         padding-top: 5%;
-        margin: 2.81%;
-        margin-top: 4.35%;
+        margin: 2%;
+        margin-top: 4.5%;
         border-radius: 4px;
         box-shadow: 0px 0px 3px 2px rgba(0, 0, 0, .2);
     }

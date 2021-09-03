@@ -34,7 +34,7 @@ export class Round {
                 }
                 await timeoutPromise();
 
-                if (this.producedFrameNumber - this.consumedFrameNumber > 200) {
+                if (this.shouldPause()) {
                     this.isWorkLoopRunning = false;
                     return;
                 }
@@ -51,7 +51,7 @@ export class Round {
             this.producedFrameNumber++;
             await timeoutPromise();
 
-            if (this.producedFrameNumber - this.consumedFrameNumber > 200) {
+            if (this.shouldPause()) {
                 this.isWorkLoopRunning = false;
                 return;
             }
@@ -68,6 +68,10 @@ export class Round {
         if (!this.isWorkLoopRunning && this.game.currentTurn === 'BATTLE_TURN') {
             this.battleTurnWorkLoop();
         }
+    }
+
+    shouldPause() {
+        return this.producedFrameNumber - this.consumedFrameNumber > 200;
     }
 
     isBattleToTheEnd() {

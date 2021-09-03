@@ -126,7 +126,7 @@ import type { Hero as HeroType } from './worker/Hero';
 		heroTouchY = y;
 		heroTouchX = x;
 		let _hitedHero = heroRenderer.isHitHero(x, y);
-		if (_hitedHero) {
+		if (_hitedHero && _hitedHero.hero) {
 			event.preventDefault();
 			event.stopPropagation();
 			showHeroShadow = true;
@@ -241,14 +241,14 @@ import type { Hero as HeroType } from './worker/Hero';
     .main-btn {
         position: absolute;
 		z-index: 1001;
-		bottom: 19%;
-        right: 2%;
+		bottom: 17%;
+        left: 2%;
     }
 	.battle-btn {
         position: absolute;
 		z-index: 1001;
-		bottom: 19%;
-        right: 5%;
+		bottom: 17%;
+        right: 2%;
 	}
 	.round-number {
 		font-size: 30px;

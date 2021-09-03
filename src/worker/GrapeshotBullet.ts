@@ -8,7 +8,7 @@ export class GrapeshotBullet extends Bullet {
     hero: Hero;
     x = 0;
     y = 0;
-    size = 3;
+    size = 4;
     direction = 0;
     speed = 200;
     ATK = 1;
@@ -48,7 +48,7 @@ export class GrapeshotBullet extends Bullet {
                     return;
             }
 
-            let maybeEnemy = this.game.currentRound.enemySet.findEnemyByPoint(this.x, this.y);
+            let maybeEnemy = this.game.currentRound.enemySet.findEnemyByPoint(Math.round(this.x), Math.round(this.y));
 
             if (maybeEnemy) {
                 let isKilled = maybeEnemy.hited(this.ATK);

@@ -29,12 +29,12 @@ function createAverageList(width: number, num: number, space: number): number[] 
 
     return result;
 }
-let heroXList = createAverageList(1000, 9, 106);
+let heroXList = createAverageList(1000, 9, 90);
 
 export const onStageHeroPosition = heroXList.map((x, i) => ({ x, y: 70 }));
 export const offStageHeroPosition = heroXList.map((x, i) => ({ x, y: 175 }));
-export const heroSize = 80;
-export const hitSize = 120;
+export const heroSize = 40;
+export const hitSize = 90;
 
 export type heroInfo = {
     stage: 'on'|'off';
