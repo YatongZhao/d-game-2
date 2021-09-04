@@ -10,8 +10,10 @@ class HeroRenderer {
     outHeroCanvas: HTMLCanvasElement[] = [];
     outMoveCanvas: HTMLCanvasElement[] = [];
 
-    currentOnStageHero: (Hero|null)[] = [null, null, null, null, null, null, null, null, null];
-    currentOffStageHero: (Hero|null)[] = [null, null, null, null, null, null, null, null, null];
+    currentOnStageHero: (heroCopy|null)[] = [null, null, null, null, null, null, null, null, null];
+    currentOffStageHero: (heroCopy|null)[] = [null, null, null, null, null, null, null, null, null];
+
+    selectedHero: heroCopy|null = null;
 
     constructor() {
         this.heroCanvas.width = heroCanvasWidth;
@@ -46,6 +48,10 @@ class HeroRenderer {
             ctx.putImageData(this.heroCtx.getImageData(
                 0, 0, heroCanvasWidth, heroCanvasHeight
             ), 0, 0);
+
+            if (this.selectedHero) {
+                this.clearMovedHero(this.selectedHero);
+            }
         });
     }
 
@@ -55,8 +61,6 @@ class HeroRenderer {
     }) {
         this.diffHero(this.currentOffStageHero, offStageHero, 'off');
         this.diffHero(this.currentOnStageHero, onStageHero, 'on');
-
-        // this.renderOutHero();
     }
 
     renderOutMove() {
@@ -71,6 +75,7 @@ class HeroRenderer {
     }
 
     clearOutMove() {
+        this.selectedHero = null;
         const ctx = this.moveCanvas.getContext('2d');
         if (!ctx) return;
         
@@ -78,14 +83,19 @@ class HeroRenderer {
         this.renderOutMove();
     }
 
-    setMove(hero: heroInfoSet, position: {x: number, y: number}) {
+    setMove(hero: heroInfoSet, position: {x: number, y: number}, offset: { offsetX: number, offsetY: number }) {
+        this.selectedHero = hero.hero;
         const ctx = this.moveCanvas.getContext('2d');
         if (!ctx) return;
         
         ctx.clearRect(0, 0, heroCanvasWidth, heroCanvasHeight);
-        this.requestDrawHero(ctx, hero.hero, position);
+        this.requestDrawHero(ctx, hero.hero, {
+            x: position.x - offset.offsetX,
+            y: position.y - offset.offsetY
+        }, this.outMoveCanvas);
 
         this.renderOutMove();
+        this.clearMovedHero(hero.hero as heroCopy);
     }
 
     diffHero(currentHero: (heroCopy|null)[], inHero: (heroCopy|null)[], stage: 'on'|'off') {
@@ -103,11 +113,27 @@ class HeroRenderer {
             currentHero[i] = _hero;
             let position = (stage === 'on' ? onStageHeroPosition : offStageHeroPosition)[i];
             ctx.clearRect(position.x - heroSize / 2 - 1, position.y - heroSize / 2 - 1, heroSize + 2, heroSize + 2);
-            this.requestDrawHero(ctx, _hero, position);
+            this.requestDrawHero(ctx, _hero, position, this.outHeroCanvas);
         });
     }
 
-    requestDrawHero(ctx: CanvasRenderingContext2D, hero: heroCopy|null, position: {x: number; y: number}) {
+    clearMovedHero(hero: heroCopy) {
+        let stage = 'off';
+        let idx = this.currentOffStageHero.findIndex(_hero => _hero === hero);
+        if (idx < 0) {
+            idx = this.currentOnStageHero.findIndex(_hero => _hero === hero);
+            stage = 'on';
+        }
+        this.outHeroCanvas.forEach(canvas => {
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+
+            let position = (stage === 'on' ? onStageHeroPosition : offStageHeroPosition)[idx];
+            ctx.clearRect(position.x - heroSize / 2 - 1, position.y - heroSize / 2 - 1, heroSize + 2, heroSize + 2);
+        });
+    }
+
+    requestDrawHero(ctx: CanvasRenderingContext2D, hero: heroCopy|null, position: {x: number; y: number}, canvasCollect: HTMLCanvasElement[]) {
         let x = position.x - heroSize / 2;
         let y = position.y - heroSize / 2;
         if (hero) {
@@ -115,11 +141,11 @@ class HeroRenderer {
             ctx.fillStyle = 'white';
             ctx.fillRect(x, y, heroSize, heroSize);
         }
-        this.outHeroCanvas.forEach(canvas => {
-            const ctx = canvas.getContext('2d');
-            if (!ctx || !this.heroCtx) return;
+        canvasCollect.forEach(canvas => {
+            const _ctx = canvas.getContext('2d');
+            if (!_ctx) return;
 
-            ctx.putImageData(this.heroCtx.getImageData(
+            _ctx.putImageData(ctx.getImageData(
                 x - 1, y - 1, heroSize + 2, heroSize + 2
             ), x - 1, y - 1);
         });

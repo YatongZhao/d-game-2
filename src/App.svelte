@@ -1,7 +1,7 @@
 <script lang="ts">
 import { onDestroy, onMount } from "svelte";
 import { fly } from "svelte/transition";
-import { battleGroundDistance, battleGroundHeight, battleGroundWidth, heroCanvasHeight, heroCanvasWidth, heroInfo, heroInfoSet, HPHeight, HPWidth, init$, initHP } from "./const";
+import { battleGroundDistance, battleGroundHeight, battleGroundWidth, heroCanvasHeight, heroCanvasWidth, heroInfo, heroInfoSet, HPHeight, HPWidth, init$, initHP, offStageHeroPosition, onStageHeroPosition } from "./const";
 import { setCanvas } from "./draw";
 import { setBulletCanvas } from "./draw/drawBullet";
 import { heroRenderer } from "./draw/drawHero";
@@ -26,6 +26,7 @@ import type { Hero as HeroType } from './worker/Hero';
 	let width = window.innerWidth;
 	let height = window.innerHeight;
 	let ratio = height / width;
+	let unitVw = ratio > 2 ? width / 100 : height / 200;
 	
 	let heroSec: HTMLDivElement;
 	let heroLeft = 0;
@@ -33,8 +34,11 @@ import type { Hero as HeroType } from './worker/Hero';
 
 	let showHeroShadow = false;
 	let hitedHero: heroInfoSet|null = null;
+	let hitedHero2: heroInfoSet|null = null;
 	let heroTouchX = 0;
 	let heroTouchY = 0;
+	let heroTouchOffsetX = 0;
+	let heroTouchOffsetY = 0;
 	
 	function handleMessage(msg: MessageEvent) {
 		HP = msg.data.HP;
@@ -53,37 +57,55 @@ import type { Hero as HeroType } from './worker/Hero';
 		width = window.innerWidth;
 		height = window.innerHeight;
 		ratio = height / width;
+		unitVw = ratio > 2 ? width / 100 : height / 200;
 
 		heroLeft = heroSec.offsetLeft;
 		heroTop = heroSec.offsetTop;
 	};
 
 	async function handleHeroTouchEnd() {
-		showHeroShadow = false;
-		heroRenderer.clearOutMove();
 		window.removeEventListener('touchmove', handleHeroTouchMove);
-		if (hitedHero) {
-			let hitedHero2 = heroRenderer.isHitHero(heroTouchX, heroTouchY);
-			if (hitedHero2 && hitedHero2.hero !== hitedHero.hero) {
-				let res = await game.moveHero(hitedHero.heroInfo, hitedHero2.heroInfo);
-				heroRenderer.setHero(res as any);
-			}
-		}
-		hitedHero = null;
+		await endCore();
 	}
 
-	function handleHeroTouchMove(e: TouchEvent) {
-        e.preventDefault();
-        e.stopPropagation();
-		let {x, y} = getHeroTouchPosition(e);
-		heroTouchY = y;
-		heroTouchX = x;
-		hitedHero && heroRenderer.setMove(hitedHero, { x: heroTouchX, y: heroTouchY });
+	function handleHeroTouchMove(event: TouchEvent) {
+        event.preventDefault();
+        event.stopPropagation();
+		let _x = event.touches[0].clientX;
+		let _y = event.touches[0].clientY;
+		moveCore(_x, _y);
+	}
+
+	function handleTouchStart(event: TouchEvent) {
+		let _x = event.touches[0].clientX;
+		let _y = event.touches[0].clientY;
+		startCore(event, _x, _y, () => window.addEventListener('touchmove', handleHeroTouchMove, { passive: false }));
+	}
+
+	async function handleMouseUp() {
+		window.removeEventListener('mousemove', handleMouseMove);
+		await endCore();
+	}
+
+	function handleMouseMove(event: MouseEvent) {
+		event.preventDefault();
+		event.stopPropagation();
+		let _x = event.clientX;
+		let _y = event.clientY;
+		moveCore(_x, _y);
+	}
+
+	function handleMouseDown(event: MouseEvent) {
+		let _x = event.clientX;
+		let _y = event.clientY;
+		startCore(event, _x, _y, () => window.addEventListener('mousemove', handleMouseMove, { passive: false }));
+
 	}
 
 	onMount(() => {
 		window.addEventListener('resize', handleRem);
 		window.addEventListener('touchend', handleHeroTouchEnd);
+		window.addEventListener('mouseup', handleMouseUp);
 
 		heroLeft = heroSec.offsetLeft;
 		heroTop = heroSec.offsetTop;
@@ -114,9 +136,7 @@ import type { Hero as HeroType } from './worker/Hero';
 		window.removeEventListener('touchend', handleHeroTouchEnd);
 	});
 
-	function getHeroTouchPosition(event: TouchEvent) {
-		let x = event.touches[0].clientX;
-		let y = event.touches[0].clientY;
+	function getHeroTouchPosition(x: number, y: number) {
 		let _ratio;
 		if (ratio > 2) {
 			_ratio = width / battleGroundWidth;
@@ -131,9 +151,9 @@ import type { Hero as HeroType } from './worker/Hero';
 		return {x, y};
 	}
 
-	function handleTouchStart(event: TouchEvent) {
+	function startCore(event: TouchEvent|MouseEvent, _x: number, _y: number, addEventListenerCb: () => void) {
 		if (currentTurn === 'BATTLE_TURN') return;
-		let {x, y} = getHeroTouchPosition(event);
+		let {x, y} = getHeroTouchPosition(_x, _y);
 		heroTouchY = y;
 		heroTouchX = x;
 		let _hitedHero = heroRenderer.isHitHero(x, y);
@@ -142,20 +162,54 @@ import type { Hero as HeroType } from './worker/Hero';
 			event.stopPropagation();
 			showHeroShadow = true;
 			hitedHero = _hitedHero;
-			window.addEventListener('touchmove', handleHeroTouchMove, { passive: false });
-			heroRenderer.setMove(hitedHero, { x, y });
+			let { stage, index } = hitedHero.heroInfo;
+			let position = (stage === 'on' ? onStageHeroPosition : offStageHeroPosition)[index];
+			heroTouchOffsetX = heroTouchX - position.x;
+			heroTouchOffsetY = heroTouchY - position.y;
+			addEventListenerCb();
+			heroRenderer.setMove(hitedHero, { x, y }, { offsetX: heroTouchOffsetX, offsetY: heroTouchOffsetY });
 		}
+	}
+
+	function moveCore(_x: number, _y: number) {
+		let {x, y} = getHeroTouchPosition(_x, _y);
+		heroTouchY = y;
+		heroTouchX = x;
+		hitedHero && heroRenderer.setMove(
+			hitedHero,
+			{ x: heroTouchX, y: heroTouchY },
+			{ offsetX: heroTouchOffsetX, offsetY: heroTouchOffsetY });
+		
+		hitedHero2 = heroRenderer.isHitHero(heroTouchX - heroTouchOffsetX, heroTouchY - heroTouchOffsetY);
+	}
+
+	async function endCore() {
+		showHeroShadow = false;
+		heroRenderer.clearOutMove();
+		if (hitedHero) {
+			let hitedHero2 = heroRenderer.isHitHero(heroTouchX - heroTouchOffsetX, heroTouchY - heroTouchOffsetY);
+			if (hitedHero2 && hitedHero2.hero !== hitedHero.hero) {
+				let res = await game.moveHero(hitedHero.heroInfo, hitedHero2.heroInfo);
+				heroRenderer.setHero(res as any);
+			} else {
+				heroRenderer.renderOutHero();
+			}
+		} else {
+			heroRenderer.renderOutHero();
+		}
+		hitedHero = null;
+		hitedHero2 = null;
 	}
 </script>
 
 <main style={`width:${ratio > 2 ? width+'px' : height/2+'px'};height:${ratio > 2 ? width*2+'px' : height+'px'}`}>
 	<canvas class="enemy-canvas" bind:this={canvas} />
 	<div class="hero-canvas" bind:this={heroSec}>
-		<Hero />
+		<Hero unitVw={unitVw} ratio={ratio} selectedIndex={hitedHero2 ? hitedHero2.heroInfo.index : -1} stage={hitedHero2 ? hitedHero2.heroInfo.stage : 'on'} />
 	</div>
 	{#if showHeroShadow}
-	<div class="hero-shadow">
-		<Hero />
+	<div class="hero-shadow" style={`bottom: ${unitVw*30+1}px;`}>
+		<Hero unitVw={unitVw} ratio={ratio} selectedIndex={hitedHero2 ? hitedHero2.heroInfo.index : -1} stage={hitedHero2 ? hitedHero2.heroInfo.stage : 'on'} />
 	</div>
 	{/if}
 	<canvas class="bullet-canvas" bind:this={bulletCanvas} />
@@ -165,13 +219,13 @@ import type { Hero as HeroType } from './worker/Hero';
 	</div>
 	<div class="event-mask" on:click={() => {
 		showShop = false;
-	}} on:touchstart={handleTouchStart}></div>
+	}} on:touchstart={handleTouchStart} on:mousedown={handleMouseDown}></div>
 	<button class:h={ratio > 2} class:w={ratio <= 2}
 		disabled={currentTurn === 'BATTLE_TURN'}
 		on:click={() => game.startFighting()} class="battle-btn">开始战斗</button>
 	<button class:h={ratio > 2} class:w={ratio <= 2} on:click={handleShow} class="main-btn">商店</button>
 	{#if showShop}
-		<Shop ratio={ratio} money={money} />
+		<Shop unitVw={unitVw} ratio={ratio} money={money} />
 	{/if}
 	<div class:h={ratio > 2} class:w={ratio <= 2} class="round-number">
 		Round
@@ -205,7 +259,7 @@ import type { Hero as HeroType } from './worker/Hero';
 		z-index: 2;
 	}
 	.hero-canvas {
-		width: 100%;
+		// width: 100%;
 		position: absolute;
 		bottom: 0;
 		left: 0;
@@ -217,7 +271,6 @@ import type { Hero as HeroType } from './worker/Hero';
 		width: 100%;
 		background-color: ghostwhite;
 		position: absolute;
-		bottom: 20%;
 		left: 0;
 		z-index: 10000;
 	}
@@ -271,6 +324,7 @@ import type { Hero as HeroType } from './worker/Hero';
         position: absolute;
 		z-index: 1001;
 		border-radius: 5px;
+		outline: none;
 		&.h {
 			bottom: 37vw;
 			left: 1vw;
@@ -284,6 +338,7 @@ import type { Hero as HeroType } from './worker/Hero';
         position: absolute;
 		border-radius: 5px;
 		z-index: 1001;
+		outline: none;
 		&.h {
 			bottom: 37vw;
 			right: 1vw;
@@ -326,15 +381,19 @@ import type { Hero as HeroType } from './worker/Hero';
 		text-shadow: 3px 5px 1px rgba(0, 0, 0, .2);
 		color: brown;
 		font-weight: 900;
+		background-color: rgba(255, 255, 255, .8);
+		font-family: Monaco;
 		&.h {
 			font-size: 6vw;
 			top: 8vw;
 			right: 8vw;
+			padding: 0 4vw;
 		}
 		&.w {
 			font-size: 3vh;
 			top: 4vh;
 			right: 4vh;
+			padding: 0 2vh;
 		}
 	}
 </style>

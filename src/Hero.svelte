@@ -3,6 +3,10 @@ import { onDestroy, onMount } from "svelte";
 import { heroCanvasHeight, heroCanvasWidth, offStageHeroPosition, onStageHeroPosition } from "./const";
 import { heroRenderer } from "./draw/drawHero";
 
+    export let ratio: number;
+    export let unitVw: number;
+    export let selectedIndex: number;
+    export let stage: 'on'|'off';
     let heroCanvas: HTMLCanvasElement;
     let moveCanvas: HTMLCanvasElement;
 
@@ -24,13 +28,17 @@ import { heroRenderer } from "./draw/drawHero";
 <div class="container">
     <div class="bg">
         <div class="top-container">
-            {#each onStageHeroPosition as pos}
-                <div class="item"></div>
+            {#each onStageHeroPosition as pos, i}
+                <div style={`left:${pos.x/10*unitVw + 'px'};top:${pos.y/10*unitVw + 'px'}`} class="item">
+                    <div class:selected={stage === 'on' && selectedIndex === i} class:h={ratio > 2} class:w={ratio <= 2} class="inner"></div>
+                </div>
             {/each}
         </div>
         <div class="bottom-container">
-            {#each offStageHeroPosition as pos}
-                <div class="item"></div>
+            {#each offStageHeroPosition as pos, i}
+                <div style={`left:${pos.x/10*unitVw + 'px'};top:${pos.y/10*unitVw + 'px'}`} class="item">
+                    <div class:selected={stage === 'off' && selectedIndex === i} class:h={ratio > 2} class:w={ratio <= 2} class="inner"></div>
+                </div>
             {/each}
         </div>
     </div>
@@ -38,7 +46,7 @@ import { heroRenderer } from "./draw/drawHero";
     <canvas class="move-canvas" bind:this={moveCanvas} />
 </div>
 
-<style>
+<style lang="scss">
     .container {
         width: 100%;
         position: relative;
@@ -67,18 +75,44 @@ import { heroRenderer } from "./draw/drawHero";
     .top-container {
         display: flex;
         justify-content: center;
+        position: relative;
     }
     .bottom-container {
         display: flex;
         justify-content: center;
-        margin-top: -1%;
+        position: relative;
     }
     .item {
-        width: 5%;
-        padding-top: 5%;
-        margin: 2%;
-        margin-top: 4.5%;
-        border-radius: 4px;
-        box-shadow: 0px 0px 3px 2px rgba(0, 0, 0, .2);
+        position: absolute;
+        .inner {
+            position: absolute;
+            background-color: burlywood;
+            transition: all 0.1s;
+            border-radius: 4px;
+            &.h {
+                height: 4vw;
+                width: 4vw;
+                left: -2vw;
+                top: -2vw;
+                &.selected {
+                    height: 8vw;
+                    width: 8vw;
+                    left: -4vw;
+                    top: -4vw;
+                }
+            }
+            &.w {
+                height: 2vh;
+                width: 2vh;
+                left: -1vh;
+                top: -1vh;
+                &.selected {
+                    height: 4vh;
+                    width: 4vh;
+                    left: -2vh;
+                    top: -2vh;
+                }
+            }
+        }
     }
 </style>

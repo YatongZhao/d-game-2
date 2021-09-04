@@ -1,12 +1,16 @@
 <script lang="ts">
 import { heroItem, heroShop } from "./HeroShop";
+import { fly } from "svelte/transition";
 
     export let ratio: number;
+    export let unitVw: number;
     export let money: number;
     let heroList: (heroItem|null)[] = heroShop.heroList;
 </script>
 
-<div class="container" class:h={ratio > 2} class:w={ratio <= 2}>
+<div class="container" class:h={ratio > 2} class:w={ratio <= 2}
+    style={`width: ${unitVw*98}px;`}
+    in:fly={{ x: -400 }} out:fly={{ x: 800 }}>
     {#each heroList as hero, i}
         {#if hero}
         <button disabled={money < hero.$} on:click={() => {
@@ -24,14 +28,9 @@ import { heroItem, heroShop } from "./HeroShop";
         top: 50%;
         transform: translate3d(-50%, -50%, 0);
         box-sizing: border-box;
-        box-shadow: 3px 4px 5px 5px rgba(0, 0, 0, .1);
+        box-shadow: 2px 3px 1px 1px rgba(0, 0, 0, .1);
         z-index: 10000;
-        background-color: white;
-    }
-    .w {
-        width: 49vh;
-    }
-    .h {
-        width: 98vw;
+        padding: 8px;
+        background-color: ghostwhite;
     }
 </style>

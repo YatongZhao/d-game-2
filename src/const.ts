@@ -1,4 +1,4 @@
-import type { Hero } from "./worker/Hero";
+import type { Hero, heroCopy } from "./worker/Hero";
 
 export const battleGroundDistance = 1700;
 export const battleGroundWidth = 1000;
@@ -36,7 +36,7 @@ let heroXList = createAverageList(1000, 9, 90);
 
 export const onStageHeroPosition = heroXList.map((x, i) => ({ x, y: 70 }));
 export const offStageHeroPosition = heroXList.map((x, i) => ({ x, y: 175 }));
-export const heroSize = 40;
+export const heroSize = 50;
 export const hitSize = 90;
 
 export type heroInfo = {
@@ -45,7 +45,7 @@ export type heroInfo = {
 }
 
 export type heroInfoSet = {
-    hero: Hero|null;
+    hero: heroCopy|null;
     heroInfo: heroInfo;
 }
 
