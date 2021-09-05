@@ -19,6 +19,8 @@ export type frame = {
     roundNumber: number;
     $: number;
     heroSetOperationTime: number;
+    bufferFrameNumber: number;
+    isGameOver: boolean;
 }
 
 export class Game {
@@ -28,6 +30,8 @@ export class Game {
     frameCounter = new FrameCounter();
     frameBuffer: frame[] = [];
     requestPushFrame = false;
+
+    isGameOver = false;
 
     currentTurn: currentTurn = 'STRATEGY_TURN';
 
@@ -63,6 +67,8 @@ export class Game {
             roundNumber: this.currentRound.roundNumber,
             $: this.$,
             heroSetOperationTime: this.heroSet.operationTime,
+            bufferFrameNumber: this.currentRound.producedFrameNumber - this.currentRound.consumedFrameNumber,
+            isGameOver: this.isGameOver,
         });
         if (this.requestPushFrame) {
             this.pushFrame();

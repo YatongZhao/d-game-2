@@ -17,6 +17,8 @@ export class Round {
     }
 
     startBattle() {
+        this.producedFrameNumber = 0;
+        this.consumedFrameNumber = 0;
         this.battleTurnWorkLoop();
     }
 
@@ -57,8 +59,13 @@ export class Round {
             }
         }
 
+        if (this.game.HP <= 0) {
+            this.game.isGameOver = true;
+        } else {
+            this.game.currentRound = new Round(this.game, this.roundNumber + 1);
+        }
+        
         this.game.toggleToStrategyTurn();
-        this.game.currentRound = new Round(this.game, this.roundNumber + 1);
         this.game.produceFrame();
         this.isWorkLoopRunning = false;
     }

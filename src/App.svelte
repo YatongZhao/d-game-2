@@ -39,11 +39,17 @@ import type { Hero as HeroType } from './worker/Hero';
 	let heroTouchY = 0;
 	let heroTouchOffsetX = 0;
 	let heroTouchOffsetY = 0;
+
+	// let bufferFrameNumber = 0;
+
+	let isGameOver = false;
 	
 	function handleMessage(msg: MessageEvent) {
 		HP = msg.data.HP;
 		roundNumber = msg.data.roundNumber;
 		currentTurn = msg.data.currentTurn;
+		// bufferFrameNumber = msg.data.bufferFrameNumber;
+		isGameOver = msg.data.isGameOver;
 		heroShop.set$(msg.data.$);
 		money = heroShop.get$();
 		setHP(HP);
@@ -158,6 +164,7 @@ import type { Hero as HeroType } from './worker/Hero';
 		heroTouchX = x;
 		let _hitedHero = heroRenderer.isHitHero(x, y);
 		if (_hitedHero && _hitedHero.hero) {
+			showShop = false;
 			event.preventDefault();
 			event.stopPropagation();
 			showHeroShadow = true;
@@ -222,10 +229,13 @@ import type { Hero as HeroType } from './worker/Hero';
 	}} on:touchstart={handleTouchStart} on:mousedown={handleMouseDown}></div>
 	<button class:h={ratio > 2} class:w={ratio <= 2}
 		disabled={currentTurn === 'BATTLE_TURN'}
-		on:click={() => game.startFighting()} class="battle-btn">开始战斗</button>
+		on:click={() => {
+			game.startFighting();
+			showShop = false;
+		}} class="battle-btn">开始战斗</button>
 	<button class:h={ratio > 2} class:w={ratio <= 2} on:click={handleShow} class="main-btn">商店</button>
 	{#if showShop}
-		<Shop unitVw={unitVw} ratio={ratio} money={money} />
+		<Shop unitVw={unitVw} money={money} />
 	{/if}
 	<div class:h={ratio > 2} class:w={ratio <= 2} class="round-number">
 		Round
@@ -234,6 +244,12 @@ import type { Hero as HeroType } from './worker/Hero';
 		{/key}
 	</div>
 	<div class:h={ratio > 2} class:w={ratio <= 2} class="money">${money}</div>
+	{#if isGameOver}
+	<div class="game-over-box" style={`font-size: ${unitVw*12}px;`}
+		in:fly={{ x: -100 }} out:fly={{ x: 100 }}>
+		Game Over
+	</div>
+	{/if}
 </main>
 
 <style lang="scss">
@@ -395,5 +411,13 @@ import type { Hero as HeroType } from './worker/Hero';
 			right: 4vh;
 			padding: 0 2vh;
 		}
+	}
+	.game-over-box {
+		z-index: 1000000;
+		position: absolute;
+		right: 0;
+		top: 30%;
+		font-weight: 100;
+		color: darkcyan;
 	}
 </style>

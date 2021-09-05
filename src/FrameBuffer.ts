@@ -39,6 +39,8 @@ const render = () => {
         HP: frame.HP,
         roundNumber: frame.roundNumber,
         $: frame.$,
+        bufferFrameNumber: frame.bufferFrameNumber,
+        isGameOver: frame.isGameOver,
     });
     heroRenderer.setHero({
         onStageHero: frame.onStageHero,

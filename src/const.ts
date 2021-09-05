@@ -19,6 +19,7 @@ export const HPHeight = 36;
 
 export const initHP = 1000;
 export const init$ = 500;
+export const refresh$ = 20;
 
 function createAverageList(width: number, num: number, space: number): number[] {
     let startSpace = (width - space * (num - 1)) / 2;
@@ -35,7 +36,7 @@ function createAverageList(width: number, num: number, space: number): number[] 
 let heroXList = createAverageList(1000, 9, 90);
 
 export const onStageHeroPosition = heroXList.map((x, i) => ({ x, y: 70 }));
-export const offStageHeroPosition = heroXList.map((x, i) => ({ x, y: 175 }));
+export const offStageHeroPosition = heroXList.map((x, i) => ({ x, y: 195 }));
 export const heroSize = 50;
 export const hitSize = 90;
 

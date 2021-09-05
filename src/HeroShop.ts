@@ -1,4 +1,4 @@
-import { offStageHeroPosition } from "./const";
+import { offStageHeroPosition, refresh$ } from "./const";
 import { getCurrentFrame } from "./FrameBuffer";
 import { game } from "./game";
 import type { Hero, heroCopy } from "./worker/Hero";
@@ -20,7 +20,7 @@ class HeroShop {
     heroList: (heroItem|null)[] = new Array(5).fill(grapeshotHeroItem);
     $ = 0;
     costed$ = 0;
-    refresh$ = 20;
+    refresh$ = refresh$;
     heroSetOperationTime = 0;
     operationStack: {
         position: number;
