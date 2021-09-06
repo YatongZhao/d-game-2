@@ -20,6 +20,14 @@ export const moveHero = async (pos1: heroPos, pos2: heroPos) => {
     }
 }
 
+export const deleteHero = async (id: string) => {
+    game.heroSet.delete(id);
+    return {
+        onStageHero: game.heroSet.copyOnStageHero(),
+        offStageHero: game.heroSet.copyOffStageHero(),
+    }
+}
+
 export const buyHero = async (heroType: heroType) => {
     game.heroSet.add(heroType);
     game.heroSet.operationTime++;
@@ -37,6 +45,7 @@ export default () => ({
     startFighting,
     addConsumedFrameNumber,
     moveHero,
+    deleteHero,
     buyHero,
     restartGame,
     addEventListener: self.addEventListener,

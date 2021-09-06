@@ -140,6 +140,10 @@ class HeroRenderer {
             ctx.strokeRect(x, y, heroSize, heroSize);
             ctx.fillStyle = 'white';
             ctx.fillRect(x, y, heroSize, heroSize);
+            ctx.font = '40px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = 'black';
+            ctx.fillText('' + hero.level, x + heroSize / 2, y + 40);
         }
         canvasCollect.forEach(canvas => {
             const _ctx = canvas.getContext('2d');

@@ -14,6 +14,16 @@ const grapeshotHeroItem = {
     type: 'grapeshotHero',
     name: '霰弹',
     $: 300,
+    sold$: [250, 500, 1000],
+}
+
+export const heroMap: { [key: string]: {
+    type: string;
+    name: string;
+    $: number;
+    sold$: number[];
+} } = {
+    grapeshotHero: grapeshotHeroItem,
 }
 
 class HeroShop {
@@ -67,11 +77,17 @@ class HeroShop {
                 level: 1,
                 killNumber: 0,
                 id: '',
-                ...offStageHeroPosition[position]
+                ...offStageHeroPosition[position],
+                type: maybeHero.type,
             }
         });
         game.buyHero(maybeHero.type);
         this.heroSetOperationTime++;
+    }
+
+    async sell(id: string, type: string, level: number) {
+        this.setCosted$(-heroMap[type].sold$[level - 1]);
+        return await game.deleteHero(id);
     }
 }
 

@@ -5,6 +5,7 @@ export const battleGroundWidth = 1000;
 
 export const heroCanvasHeight = 300;
 export const heroCanvasWidth = 1000;
+export const deleteHeroBtnHeight = 200;
 
 export const battleGroundHeight = battleGroundDistance + heroCanvasHeight;
 export const enemySize = 50;

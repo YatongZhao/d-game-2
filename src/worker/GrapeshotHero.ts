@@ -5,6 +5,7 @@ import { Hero } from "./Hero";
 export class GrapeshotHero extends Hero {
     cycle = 5;
     bulletNumber = 5;
+    type = 'grapeshotHero';
 
     static fromPosition(game: Game, position: {x: number, y: number}): GrapeshotHero {
         let hero = new GrapeshotHero(game);

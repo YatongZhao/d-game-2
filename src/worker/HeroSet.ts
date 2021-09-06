@@ -51,7 +51,8 @@ export class HeroSet {
             level: hero.level,
             killNumber: hero.killNumber,
             id: hero.id,
-            x: hero.x, y: hero.y
+            x: hero.x, y: hero.y,
+            type: hero.type,
         }));
     }
 
@@ -60,7 +61,8 @@ export class HeroSet {
             level: hero.level,
             killNumber: hero.killNumber,
             id: hero.id,
-            x: hero.x, y: hero.y
+            x: hero.x, y: hero.y,
+            type: hero.type,
         }));
     }
 
@@ -77,6 +79,16 @@ export class HeroSet {
                 this.offStageHero[index] = GrapeshotHero.fromPosition(this.game, position);
                 break;
         }
+    }
+
+    delete(id: string) {
+        this.onStageHero = this.onStageHero.filter(maybeHero => {
+            return !(maybeHero && maybeHero.id === id);
+        });
+        this.offStageHero = this.offStageHero.filter(maybeHero => {
+            return !(maybeHero && maybeHero.id === id);
+        });
+        this.onStageNotNullHero = this.onStageHero.filter(Boolean) as Hero[];
     }
 
     move(pos1: heroPos, pos2: heroPos) {

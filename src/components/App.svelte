@@ -1,17 +1,18 @@
 <script lang="ts">
 import { onDestroy, onMount } from "svelte";
 import { fly } from "svelte/transition";
-import { battleGroundDistance, battleGroundHeight, battleGroundWidth, heroCanvasHeight, heroCanvasWidth, heroInfo, heroInfoSet, HPHeight, HPWidth, init$, initHP, offStageHeroPosition, onStageHeroPosition } from "../const";
+import { battleGroundDistance, battleGroundHeight, battleGroundWidth, deleteHeroBtnHeight, heroCanvasHeight, heroCanvasWidth, heroInfo, heroInfoSet, heroSize, HPHeight, HPWidth, init$, initHP, offStageHeroPosition, onStageHeroPosition } from "../const";
 import { setCanvas } from "../draw/drawEnemy";
 import { setBulletCanvas } from "../draw/drawBullet";
 import { heroRenderer } from "../draw/drawHero";
 import { setHP, setHPCanvas } from "../draw/drawHP";
 import { game } from "../game";
 import Hero from "./Hero.svelte";
-import { heroShop } from "../HeroShop";
+import { heroMap, heroShop } from "../HeroShop";
 import { port2 } from "../messageChannel";
 import Shop from "./Shop.svelte";
 import type { currentTurn } from "../worker/Game";
+import type { heroCopy } from "../worker/Hero";
 
     let canvas: HTMLCanvasElement;
     let HPCanvas: HTMLCanvasElement;
@@ -33,11 +34,13 @@ import type { currentTurn } from "../worker/Game";
 
 	let showHeroShadow = false;
 	let hitedHero: heroInfoSet|null = null;
+	let hitedHeroSoldMoney = 0;
 	let hitedHero2: heroInfoSet|null = null;
 	let heroTouchX = 0;
 	let heroTouchY = 0;
 	let heroTouchOffsetX = 0;
 	let heroTouchOffsetY = 0;
+	let isHitDeleteHero = false;
 
 	// let bufferFrameNumber = 0;
 
@@ -168,6 +171,7 @@ import type { currentTurn } from "../worker/Game";
 			event.stopPropagation();
 			showHeroShadow = true;
 			hitedHero = _hitedHero;
+			hitedHeroSoldMoney = heroMap[_hitedHero.hero.type].sold$[_hitedHero.hero.level - 1];
 			let { stage, index } = hitedHero.heroInfo;
 			let position = (stage === 'on' ? onStageHeroPosition : offStageHeroPosition)[index];
 			heroTouchOffsetX = heroTouchX - position.x;
@@ -187,6 +191,14 @@ import type { currentTurn } from "../worker/Game";
 			{ offsetX: heroTouchOffsetX, offsetY: heroTouchOffsetY });
 		
 		hitedHero2 = heroRenderer.isHitHero(heroTouchX - heroTouchOffsetX, heroTouchY - heroTouchOffsetY);
+		isHitDeleteHero = isHitDeleteHeroBtn();
+	}
+	
+	function isHitDeleteHeroBtn() {
+		return heroTouchX - heroTouchOffsetX > -heroSize
+			&& heroTouchX - heroTouchOffsetX < battleGroundWidth
+			&& heroTouchY - heroTouchOffsetY > -deleteHeroBtnHeight - heroSize
+			&& heroTouchY - heroTouchOffsetY < 0;
 	}
 
 	async function endCore() {
@@ -197,6 +209,10 @@ import type { currentTurn } from "../worker/Game";
 			if (hitedHero2 && hitedHero2.hero !== hitedHero.hero) {
 				let res = await game.moveHero(hitedHero.heroInfo, hitedHero2.heroInfo);
 				heroRenderer.setHero(res as any);
+			} else if (isHitDeleteHero) {
+				let hero = hitedHero.hero as heroCopy;
+				let res = await heroShop.sell(hero.id, hero.type, hero.level);
+				heroRenderer.setHero(res as any);
 			} else {
 				heroRenderer.renderOutHero();
 			}
@@ -205,6 +221,7 @@ import type { currentTurn } from "../worker/Game";
 		}
 		hitedHero = null;
 		hitedHero2 = null;
+		isHitDeleteHero = false;
 	}
 </script>
 
@@ -216,6 +233,12 @@ import type { currentTurn } from "../worker/Game";
 	{#if showHeroShadow}
 	<div class="hero-shadow" style={`bottom: ${unitVw*30+1}px;`}>
 		<Hero unitVw={unitVw} ratio={ratio} selectedIndex={hitedHero2 ? hitedHero2.heroInfo.index : -1} stage={hitedHero2 ? hitedHero2.heroInfo.stage : 'on'} />
+		<div class="delete-hero-btn" class:hited={isHitDeleteHero}
+			style={`height: ${unitVw*deleteHeroBtnHeight/heroCanvasWidth*100}px;`}>
+			<div class="inner">
+				移动到此区域卖掉该棋子（+{hitedHeroSoldMoney}）
+			</div>
+		</div>
 	</div>
 	{/if}
 	<canvas class="bullet-canvas" bind:this={bulletCanvas} />
@@ -299,7 +322,29 @@ import type { currentTurn } from "../worker/Game";
 		background-color: ghostwhite;
 		position: absolute;
 		left: 0;
-		z-index: 10000;
+		z-index: 1002;
+		.delete-hero-btn {
+			box-sizing: border-box;
+			width: 100%;
+			padding: 5px;
+			border-top: 1px solid gray;
+			.inner {
+				height: 100%;
+				width: 100%;
+				border: 1px dashed crimson;
+				border-radius: 10px;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				cursor: default;
+			}
+			&.hited {
+				.inner {
+					background-color: crimson;
+					color: white;
+				}
+			}
+		}
 	}
 	.hp-box {
 		position: absolute;

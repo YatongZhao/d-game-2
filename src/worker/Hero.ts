@@ -9,6 +9,7 @@ export type heroCopy = {
     id: string;
     x: number;
     y: number;
+    type: string;
 }
 
 export class Hero {
@@ -16,6 +17,7 @@ export class Hero {
     killNumber = 0;
     id = uuidV4();
     game: Game;
+    type = 'default';
 
     x = 0;
     y = 0;
