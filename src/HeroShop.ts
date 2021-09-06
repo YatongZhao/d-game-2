@@ -27,6 +27,13 @@ class HeroShop {
         hero: heroCopy;
     }[] = [];
 
+    reset() {
+        this.setCosted$(-this.costed$);
+        this.heroSetOperationTime = 0;
+        this.operationStack = [];
+        this.heroList = new Array(5).fill(grapeshotHeroItem);
+    }
+
     refresh() {
         if (this.get$() < this.refresh$) return;
         this.heroList = new Array(5).fill(grapeshotHeroItem);

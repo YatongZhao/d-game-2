@@ -224,17 +224,19 @@ import type { Hero as HeroType } from './worker/Hero';
 		<canvas class="hp-canvas" bind:this={HPCanvas} />
 		<span class="hp-span">{HP}/1000</span>
 	</div>
-	<div class="event-mask" on:click={() => {
+	<div class="event-mask" class:game-over={isGameOver} on:click={() => {
 		showShop = false;
 	}} on:touchstart={handleTouchStart} on:mousedown={handleMouseDown}></div>
 	<button class:h={ratio > 2} class:w={ratio <= 2}
-		disabled={currentTurn === 'BATTLE_TURN'}
+		disabled={currentTurn === 'BATTLE_TURN' || isGameOver}
 		on:click={() => {
 			game.startFighting();
 			showShop = false;
 		}} class="battle-btn">开始战斗</button>
-	<button class:h={ratio > 2} class:w={ratio <= 2} on:click={handleShow} class="main-btn">商店</button>
-	{#if showShop}
+	<button class:h={ratio > 2} class:w={ratio <= 2}
+		disabled={isGameOver}
+		on:click={handleShow} class="main-btn">商店</button>
+	{#if showShop && !isGameOver}
 		<Shop unitVw={unitVw} money={money} />
 	{/if}
 	<div class:h={ratio > 2} class:w={ratio <= 2} class="round-number">
@@ -245,10 +247,20 @@ import type { Hero as HeroType } from './worker/Hero';
 	</div>
 	<div class:h={ratio > 2} class:w={ratio <= 2} class="money">${money}</div>
 	{#if isGameOver}
-	<div class="game-over-box" style={`font-size: ${unitVw*12}px;`}
-		in:fly={{ x: -100 }} out:fly={{ x: 100 }}>
-		Game Over
-	</div>
+		<div class="game-over-box">
+			<div class="game-over-item"
+				style={`font-size: ${unitVw*12}px;padding-left: ${unitVw*2}px;`}
+				in:fly={{ x: -600 }} out:fly={{ x: 1000 }}>
+				Game Over
+			</div>
+			<button style={`margin: ${unitVw*2}px;width: fit-content;`}
+				in:fly={{ x: -1200 }} out:fly={{ x: 1000 }}
+				on:click={() => {
+					heroShop.reset();
+					game.restartGame();
+				}}
+				class="restart-btn">再来一盘</button>
+		</div>
 	{/if}
 </main>
 
@@ -335,6 +347,9 @@ import type { Hero as HeroType } from './worker/Hero';
 		width: 100%;
 		height: 100%;
 		z-index: 1000;
+		&.game-over {
+			background-color: rgba(255, 255, 255, .8);
+		}
 	}
     .main-btn {
         position: absolute;
@@ -419,5 +434,18 @@ import type { Hero as HeroType } from './worker/Hero';
 		top: 30%;
 		font-weight: 100;
 		color: darkcyan;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		.game-over-item {
+			background-color: ghostwhite;
+		}
+		.restart-btn {
+			border: none;
+			background-color: darkcyan;
+			color: white;
+			border-radius: 3px;
+			box-shadow: 3px 4px 5px rgba(0, 0, 0, .2);
+		}
 	}
 </style>

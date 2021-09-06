@@ -29,10 +29,15 @@ export const buyHero = async (heroType: heroType) => {
     }
 }
 
+export const restartGame = async () => {
+    game.restart();
+}
+
 export default () => ({
     startFighting,
     addConsumedFrameNumber,
     moveHero,
     buyHero,
+    restartGame,
     addEventListener: self.addEventListener,
 });

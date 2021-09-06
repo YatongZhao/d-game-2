@@ -27,7 +27,7 @@ import { heroRenderer } from "./draw/drawHero";
 
 <div class="container">
     <div class="bg">
-        <div class="top-container">
+        <div class="top-container" style={`height:${15*unitVw + 'px'};`}>
             {#each onStageHeroPosition as pos, i}
                 <div style={`left:${pos.x/10*unitVw + 'px'};top:${pos.y/10*unitVw + 'px'}`} class="item">
                     <div class:selected={stage === 'on' && selectedIndex === i} class:h={ratio > 2} class:w={ratio <= 2} class="inner"></div>
@@ -73,9 +73,10 @@ import { heroRenderer } from "./draw/drawHero";
         z-index: 101;
     }
     .top-container {
-        display: flex;
-        justify-content: center;
-        position: relative;
+        position: absolute;
+        width: 100%;
+        background-color: rgba($color: lightgray, $alpha: 0.4);
+		box-shadow: 0px 2px 2px 2px burlywood;
     }
     .bottom-container {
         display: flex;

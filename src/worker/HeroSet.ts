@@ -26,7 +26,7 @@ export class HeroSet {
 
     constructor(game: Game) {
         this.game = game;
-        this.onStageHero[0] = GrapeshotHero.fromPosition(game, onStageHeroPosition[0]);
+        // this.onStageHero[0] = GrapeshotHero.fromPosition(game, onStageHeroPosition[0]);
         // this.onStageHero[1] = GrapeshotHero.fromPosition(game, onStageHeroPosition[1]);
         // this.onStageHero[2] = GrapeshotHero.fromPosition(game, onStageHeroPosition[2]);
         // this.onStageHero[3] = GrapeshotHero.fromPosition(game, onStageHeroPosition[3]);
@@ -35,7 +35,7 @@ export class HeroSet {
         // this.onStageHero[6] = GrapeshotHero.fromPosition(game, onStageHeroPosition[6]);
         // this.onStageHero[7] = GrapeshotHero.fromPosition(game, onStageHeroPosition[7]);
         // this.onStageHero[8] = GrapeshotHero.fromPosition(game, onStageHeroPosition[8]);
-        this.onStageNotNullHero.push(this.onStageHero[0]);
+        // this.onStageNotNullHero.push(this.onStageHero[0]);
         // this.onStageNotNullHero.push(this.onStageHero[1]);
         // this.onStageNotNullHero.push(this.onStageHero[2]);
         // this.onStageNotNullHero.push(this.onStageHero[3]);

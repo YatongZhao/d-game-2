@@ -40,8 +40,31 @@ export class Game {
     score = 0;
 
     constructor() {
+        this.initial();
+    }
+
+    initial() {
+        this.heroSet = new HeroSet(this);
+        this.bulletSet = new BulletSet();
+        this.currentRound = new Round(this, 1);
+        this.frameCounter = new FrameCounter();
+        this.frameBuffer = [];
+        this.requestPushFrame = false;
+
+        this.isGameOver = false;
+
+        this.currentTurn = 'STRATEGY_TURN';
+
+        this.HP = initHP;
+        this.$ = init$;
+        this.score = 0;
+
         this.produceFrame();
         this.pushFrame();
+    }
+
+    restart() {
+        this.initial();
     }
 
     toggleToBattleTurn() {

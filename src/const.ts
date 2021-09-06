@@ -36,7 +36,7 @@ function createAverageList(width: number, num: number, space: number): number[] 
 let heroXList = createAverageList(1000, 9, 90);
 
 export const onStageHeroPosition = heroXList.map((x, i) => ({ x, y: 70 }));
-export const offStageHeroPosition = heroXList.map((x, i) => ({ x, y: 195 }));
+export const offStageHeroPosition = heroXList.map((x, i) => ({ x, y: 220 }));
 export const heroSize = 50;
 export const hitSize = 90;
 
