@@ -1,4 +1,4 @@
-import { battleGroundDistance, battleGroundHeight, battleGroundWidth, enemySize, enemyXSpace, enemyXStartPadding, enemyYSpace, HPHeight, HPWidth } from "./const";
+import { battleGroundDistance, battleGroundHeight, battleGroundWidth, enemySize, enemyXSpace, enemyXStartPadding, enemyYSpace, HPHeight, HPWidth } from "../const";
 
 let canvas: HTMLCanvasElement;
 export const setCanvas = (_canvas: HTMLCanvasElement) => canvas = _canvas;

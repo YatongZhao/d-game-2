@@ -1,18 +1,17 @@
 <script lang="ts">
 import { onDestroy, onMount } from "svelte";
 import { fly } from "svelte/transition";
-import { battleGroundDistance, battleGroundHeight, battleGroundWidth, heroCanvasHeight, heroCanvasWidth, heroInfo, heroInfoSet, HPHeight, HPWidth, init$, initHP, offStageHeroPosition, onStageHeroPosition } from "./const";
-import { setCanvas } from "./draw";
-import { setBulletCanvas } from "./draw/drawBullet";
-import { heroRenderer } from "./draw/drawHero";
-import { setHP, setHPCanvas } from "./draw/drawHP";
-import { game } from "./game";
+import { battleGroundDistance, battleGroundHeight, battleGroundWidth, heroCanvasHeight, heroCanvasWidth, heroInfo, heroInfoSet, HPHeight, HPWidth, init$, initHP, offStageHeroPosition, onStageHeroPosition } from "../const";
+import { setCanvas } from "../draw/drawEnemy";
+import { setBulletCanvas } from "../draw/drawBullet";
+import { heroRenderer } from "../draw/drawHero";
+import { setHP, setHPCanvas } from "../draw/drawHP";
+import { game } from "../game";
 import Hero from "./Hero.svelte";
-import { heroShop } from "./HeroShop";
-import { port2 } from "./messageChannel";
+import { heroShop } from "../HeroShop";
+import { port2 } from "../messageChannel";
 import Shop from "./Shop.svelte";
-import type { currentTurn } from "./worker/Game";
-import type { Hero as HeroType } from './worker/Hero';
+import type { currentTurn } from "../worker/Game";
 
     let canvas: HTMLCanvasElement;
     let HPCanvas: HTMLCanvasElement;

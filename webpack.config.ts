@@ -12,7 +12,7 @@ const config: webpack.Configuration & WebpackDevServerConfiguration = {
     target: 'web',
     mode,
     entry: {
-        bundle: ['./src/bootstrap.ts']
+        bundle: ['./src/main.ts']
     },
     output: {
         path: __dirname + '/dist',

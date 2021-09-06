@@ -1,7 +1,7 @@
 <script lang="ts">
 import { onDestroy, onMount } from "svelte";
-import { heroCanvasHeight, heroCanvasWidth, offStageHeroPosition, onStageHeroPosition } from "./const";
-import { heroRenderer } from "./draw/drawHero";
+import { heroCanvasHeight, heroCanvasWidth, offStageHeroPosition, onStageHeroPosition } from "../const";
+import { heroRenderer } from "../draw/drawHero";
 
     export let ratio: number;
     export let unitVw: number;

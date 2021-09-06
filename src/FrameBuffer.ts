@@ -1,5 +1,5 @@
 import { game } from './game';
-import { draw } from './draw';
+import { draw } from './draw/drawEnemy';
 import { port1 } from './messageChannel';
 import { heroRenderer } from './draw/drawHero';
 import { drawBullet } from './draw/drawBullet';

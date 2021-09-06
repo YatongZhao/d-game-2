@@ -1,6 +1,5 @@
 import './main.scss';
-import App from './App.svelte';
-import { game } from './game';
+import App from './components/App.svelte';
 import './FrameBuffer';
 import VConsole from 'vconsole';
 

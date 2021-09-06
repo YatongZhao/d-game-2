@@ -1,7 +1,7 @@
 <script lang="ts">
-import { heroItem, heroShop } from "./HeroShop";
+import { heroItem, heroShop } from "../HeroShop";
 import { fly } from "svelte/transition";
-import { refresh$ } from "./const";
+import { refresh$ } from "../const";
 
     export let unitVw: number;
     export let money: number;
