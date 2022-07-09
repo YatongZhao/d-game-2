@@ -12,7 +12,8 @@ import { heroMap, heroShop } from "../HeroShop";
 import { port2 } from "../messageChannel";
 import Shop from "./Shop.svelte";
 import type { currentTurn } from "../worker/Game";
-import type { heroCopy } from "../worker/Hero";
+import type { heroState } from "../worker/Hero";
+import { heroManager } from "../HeroManager";
 
     let canvas: HTMLCanvasElement;
     let HPCanvas: HTMLCanvasElement;
@@ -207,12 +208,12 @@ import type { heroCopy } from "../worker/Hero";
 		if (hitedHero) {
 			let hitedHero2 = heroRenderer.isHitHero(heroTouchX - heroTouchOffsetX, heroTouchY - heroTouchOffsetY);
 			if (hitedHero2 && hitedHero2.hero !== hitedHero.hero) {
-				let res = await game.moveHero(hitedHero.heroInfo, hitedHero2.heroInfo);
-				heroRenderer.setHero(res as any);
+				await heroManager.move(hitedHero.heroInfo, hitedHero2.heroInfo);
+				heroRenderer.setHero(await heroManager.getAll());
 			} else if (isHitDeleteHero) {
-				let hero = hitedHero.hero as heroCopy;
-				let res = await heroShop.sell(hero.id, hero.type, hero.level);
-				heroRenderer.setHero(res as any);
+				let hero = hitedHero.hero as heroState;
+				let res = await heroShop.sell(hero, hitedHero.heroInfo);
+				heroRenderer.setHero(await heroManager.getAll());
 			} else {
 				heroRenderer.renderOutHero();
 			}
@@ -279,6 +280,7 @@ import type { heroCopy } from "../worker/Hero";
 				in:fly={{ x: -1200 }} out:fly={{ x: 1000 }}
 				on:click={() => {
 					heroShop.reset();
+					heroManager.reset();
 					game.restartGame();
 				}}
 				class="restart-btn">再来一盘</button>

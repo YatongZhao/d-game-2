@@ -1,8 +1,8 @@
-import { offStageHeroPosition, refresh$ } from "./const";
-import { getCurrentFrame } from "./FrameBuffer";
-import { game } from "./game";
-import type { Hero, heroCopy } from "./worker/Hero";
-import { findAddHeroIndex, heroType } from "./worker/HeroSet";
+import { heroInfo, refresh$ } from "./const";
+import { heroRenderer } from "./draw/drawHero";
+import { heroManager } from "./HeroManager";
+import { createHeroState, heroState } from "./worker/Hero";
+import type { heroType } from "./worker/HeroSet";
 
 export type heroItem = {
     type: heroType;
@@ -34,7 +34,7 @@ class HeroShop {
     heroSetOperationTime = 0;
     operationStack: {
         position: number;
-        hero: heroCopy;
+        hero: heroState;
     }[] = [];
 
     reset() {
@@ -62,8 +62,8 @@ class HeroShop {
         this.costed$ += $;
     }
 
-    buy(index: number) {
-        let position = findAddHeroIndex(getCurrentFrame().offStageHero);
+    async buy(index: number) {
+        let position = heroManager.findAddHeroIndex();
         if (position < 0) return;
         let maybeHero = this.heroList[index];
         if (!maybeHero) return;
@@ -71,23 +71,17 @@ class HeroShop {
         this.setCosted$(maybeHero.$);
         this.heroList[index] = null;
 
-        this.operationStack.push({
-            position,
-            hero: {
-                level: 1,
-                killNumber: 0,
-                id: '',
-                ...offStageHeroPosition[position],
-                type: maybeHero.type,
-            }
+        await heroManager.addHero(createHeroState(maybeHero.type), {
+            stage: 'off', index: position
         });
-        game.buyHero(maybeHero.type);
-        this.heroSetOperationTime++;
+        heroRenderer.setHero(await heroManager.getAll());
     }
 
-    async sell(id: string, type: string, level: number) {
+    async sell(heroState: heroState, heroInfo: heroInfo) {
+        const { id, type, level } = heroState;
         this.setCosted$(-heroMap[type].sold$[level - 1]);
-        return await game.deleteHero(id);
+        await heroManager.deleteHero(heroInfo);
+        heroRenderer.setHero(await heroManager.getAll());
     }
 }
 

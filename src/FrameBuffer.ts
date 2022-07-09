@@ -5,24 +5,11 @@ import { heroRenderer } from './draw/drawHero';
 import { drawBullet } from './draw/drawBullet';
 import type { frame } from './worker/Game';
 import { heroShop } from './HeroShop';
+import { heroManager } from './HeroManager';
 
 let stack: {}[] = [];
 let isRenderLoopGoing = false;
 let currentFrame: frame;
-
-function mergeFrame(frame: frame) {
-    let frameHeroSetOperationTime = frame.heroSetOperationTime;
-    let heroShopOperationTime = heroShop.heroSetOperationTime;
-    let diff = heroShopOperationTime - frameHeroSetOperationTime;
-    if (diff === 0) return;
-    while (diff < heroShop.operationStack.length) {
-        heroShop.operationStack.shift();
-    }
-    if (heroShop.operationStack.length === 0) return;
-    heroShop.operationStack.forEach(operation => {
-        frame.offStageHero[operation.position] = operation.hero;
-    });
-}
 
 const render = () => {
     isRenderLoopGoing = true;
@@ -32,7 +19,6 @@ const render = () => {
         isRenderLoopGoing = false;
         return;
     }
-    mergeFrame(frame);
     draw(frame);
     port1.postMessage({
         currentTurn: frame.currentTurn,
@@ -43,8 +29,8 @@ const render = () => {
         isGameOver: frame.isGameOver,
     });
     heroRenderer.setHero({
-        onStageHero: frame.onStageHero,
-        offStageHero: frame.offStageHero,
+        onStageHero: frame.newOnStageHero,
+        offStageHero: heroManager.offstageHero.stage,
     });
     drawBullet(frame.bullets);
     game.addConsumedFrameNumber();

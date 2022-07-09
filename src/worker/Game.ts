@@ -1,10 +1,11 @@
-import { init$, initHP } from "../const";
+import { init$, initHP, onStageHeroPosition } from "../const";
 import type { Bullet } from "./Bullet";
 import { BulletSet } from "./BulletSet";
 import type { EnemySet, enemySetCopy } from "./EnemySet";
 import { FrameCounter } from "./frameCounter";
-import type { Hero, heroCopy } from "./Hero";
+import type { Hero, heroState } from "./Hero";
 import { HeroSet } from "./HeroSet";
+import { HeroStage } from "./HeroStage";
 import { Round } from "./Round";
 
 export type currentTurn = 'BATTLE_TURN'|'STRATEGY_TURN';
@@ -13,18 +14,19 @@ export type frame = {
     currentTurn: currentTurn;
     HP: number;
     enemys: enemySetCopy;
-    onStageHero: (heroCopy|null)[];
-    offStageHero: (heroCopy|null)[];
+
+    newOnStageHero: (heroState|null)[];
+
     bullets: any[];
     roundNumber: number;
     $: number;
-    heroSetOperationTime: number;
     bufferFrameNumber: number;
     isGameOver: boolean;
 }
 
 export class Game {
-    heroSet = new HeroSet(this);
+    onStageHero = new HeroStage(onStageHeroPosition);
+    // heroSet = new HeroSet(this);
     bulletSet = new BulletSet();
     currentRound = new Round(this, 1);
     frameCounter = new FrameCounter();
@@ -44,7 +46,6 @@ export class Game {
     }
 
     initial() {
-        this.heroSet = new HeroSet(this);
         this.bulletSet = new BulletSet();
         this.currentRound = new Round(this, 1);
         this.frameCounter = new FrameCounter();
@@ -84,12 +85,12 @@ export class Game {
             currentTurn: this.currentTurn,
             HP: this.HP,
             enemys: this.currentRound.enemySet.copy(),
-            onStageHero: this.heroSet.copyOnStageHero(),
-            offStageHero: this.heroSet.copyOffStageHero(),
+
+            newOnStageHero: this.currentRound.syncHeroState(),
+
             bullets: this.bulletSet.copy(),
             roundNumber: this.currentRound.roundNumber,
             $: this.$,
-            heroSetOperationTime: this.heroSet.operationTime,
             bufferFrameNumber: this.currentRound.producedFrameNumber - this.currentRound.consumedFrameNumber,
             isGameOver: this.isGameOver,
         });

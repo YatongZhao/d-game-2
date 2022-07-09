@@ -1,5 +1,5 @@
 import { heroCanvasHeight, heroCanvasWidth, heroInfo, heroInfoSet, heroSize, HPHeight, HPWidth, isHitHeroPosition, offStageHeroPosition, onStageHeroPosition } from "../const";
-import type { Hero, heroCopy } from "../worker/Hero";
+import type { Hero, heroState } from "../worker/Hero";
 
 class HeroRenderer {
     heroCanvas: HTMLCanvasElement = document.createElement('canvas');
@@ -10,10 +10,10 @@ class HeroRenderer {
     outHeroCanvas: HTMLCanvasElement[] = [];
     outMoveCanvas: HTMLCanvasElement[] = [];
 
-    currentOnStageHero: (heroCopy|null)[] = [null, null, null, null, null, null, null, null, null];
-    currentOffStageHero: (heroCopy|null)[] = [null, null, null, null, null, null, null, null, null];
+    currentOnStageHero: (heroState|null)[] = [null, null, null, null, null, null, null, null, null];
+    currentOffStageHero: (heroState|null)[] = [null, null, null, null, null, null, null, null, null];
 
-    selectedHero: heroCopy|null = null;
+    selectedHero: heroState|null = null;
 
     constructor() {
         this.heroCanvas.width = heroCanvasWidth;
@@ -56,8 +56,8 @@ class HeroRenderer {
     }
 
     setHero({ onStageHero, offStageHero }: {
-        onStageHero: (heroCopy|null)[];
-        offStageHero: (heroCopy|null)[];
+        onStageHero: (heroState|null)[];
+        offStageHero: (heroState|null)[];
     }) {
         this.diffHero(this.currentOffStageHero, offStageHero, 'off');
         this.diffHero(this.currentOnStageHero, onStageHero, 'on');
@@ -95,10 +95,10 @@ class HeroRenderer {
         }, this.outMoveCanvas);
 
         this.renderOutMove();
-        this.clearMovedHero(hero.hero as heroCopy);
+        this.clearMovedHero(hero.hero as heroState);
     }
 
-    diffHero(currentHero: (heroCopy|null)[], inHero: (heroCopy|null)[], stage: 'on'|'off') {
+    diffHero(currentHero: (heroState|null)[], inHero: (heroState|null)[], stage: 'on'|'off') {
         const ctx = this.heroCanvas.getContext('2d');
         if (!ctx) return;
     
@@ -117,7 +117,7 @@ class HeroRenderer {
         });
     }
 
-    clearMovedHero(hero: heroCopy) {
+    clearMovedHero(hero: heroState) {
         let stage = 'off';
         let idx = this.currentOffStageHero.findIndex(_hero => _hero === hero);
         if (idx < 0) {
@@ -133,7 +133,7 @@ class HeroRenderer {
         });
     }
 
-    requestDrawHero(ctx: CanvasRenderingContext2D, hero: heroCopy|null, position: {x: number; y: number}, canvasCollect: HTMLCanvasElement[]) {
+    requestDrawHero(ctx: CanvasRenderingContext2D, hero: heroState|null, position: {x: number; y: number}, canvasCollect: HTMLCanvasElement[]) {
         let x = position.x - heroSize / 2;
         let y = position.y - heroSize / 2;
         if (hero) {

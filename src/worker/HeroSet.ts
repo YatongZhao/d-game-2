@@ -1,7 +1,7 @@
 import { offStageHeroPosition, onStageHeroPosition } from "../const";
 import type { Game } from "./Game";
 import { GrapeshotHero } from "./GrapeshotHero";
-import type { Hero, heroCopy } from "./Hero";
+import type { Hero, heroState } from "./Hero";
 
 export type heroPos = {
     stage: 'on'|'off';
@@ -46,7 +46,7 @@ export class HeroSet {
         // this.onStageNotNullHero.push(this.onStageHero[8]);
     }
 
-    copyOffStageHero(): (heroCopy|null)[] {
+    copyOffStageHero(): (heroState|null)[] {
         return this.offStageHero.map(hero => hero && ({
             level: hero.level,
             killNumber: hero.killNumber,
@@ -56,7 +56,7 @@ export class HeroSet {
         }));
     }
 
-    copyOnStageHero(): (heroCopy|null)[] {
+    copyOnStageHero(): (heroState|null)[] {
         return this.onStageHero.map(hero => hero && ({
             level: hero.level,
             killNumber: hero.killNumber,
@@ -82,11 +82,15 @@ export class HeroSet {
     }
 
     delete(id: string) {
-        this.onStageHero = this.onStageHero.filter(maybeHero => {
-            return !(maybeHero && maybeHero.id === id);
+        this.onStageHero = this.onStageHero.map(maybeHero => {
+            return (maybeHero && maybeHero.id === id)
+                ? null
+                : maybeHero;
         });
-        this.offStageHero = this.offStageHero.filter(maybeHero => {
-            return !(maybeHero && maybeHero.id === id);
+        this.offStageHero = this.offStageHero.map(maybeHero => {
+            return (maybeHero && maybeHero.id === id)
+                ? null
+                : maybeHero;
         });
         this.onStageNotNullHero = this.onStageHero.filter(Boolean) as Hero[];
     }

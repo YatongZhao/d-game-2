@@ -3,7 +3,7 @@ import { Bullet } from './Bullet';
 import type { Game } from './Game';
 import { GrapeshotBullet } from './GrapeshotBullet';
 
-export type heroCopy = {
+export type heroState = {
     level: number;
     killNumber: number;
     id: string;
@@ -11,6 +11,15 @@ export type heroCopy = {
     y: number;
     type: string;
 }
+
+export const createHeroState = (type: string): heroState => ({
+    level: 1,
+    killNumber: 0,
+    id: uuidV4(),
+    type,
+    x: 0,
+    y: 0,
+});
 
 export class Hero {
     level = 1;
@@ -38,5 +47,25 @@ export class Hero {
     setPosition(position: {x: number, y: number}) {
         this.x = position.x;
         this.y = position.y;
+    }
+
+    patchState(heroState: heroState) {
+        this.level = heroState.level;
+        this.killNumber = heroState.killNumber;
+        this.id = heroState.id;
+        this.type = heroState.type;
+        this.x = heroState.x;
+        this.y = heroState.y;
+    }
+
+    produceState(): heroState {
+        return {
+            level: this.level,
+            killNumber: this.killNumber,
+            id: this.id,
+            type: this.type,
+            x: this.x,
+            y: this.y,
+        };
     }
 }

@@ -1,4 +1,5 @@
 import { Game } from './Game';
+import type { heroState } from './Hero';
 import type { heroPos, heroType } from './HeroSet';
 const game = new Game();
 
@@ -12,41 +13,28 @@ export const addConsumedFrameNumber = async () => {
     game.pushFrame();
 }
 
-export const moveHero = async (pos1: heroPos, pos2: heroPos) => {
-    game.heroSet.move(pos1, pos2);
-    return {
-        onStageHero: game.heroSet.copyOnStageHero(),
-        offStageHero: game.heroSet.copyOffStageHero(),
-    }
-}
-
-export const deleteHero = async (id: string) => {
-    game.heroSet.delete(id);
-    return {
-        onStageHero: game.heroSet.copyOnStageHero(),
-        offStageHero: game.heroSet.copyOffStageHero(),
-    }
-}
-
-export const buyHero = async (heroType: heroType) => {
-    game.heroSet.add(heroType);
-    game.heroSet.operationTime++;
-    if (game.currentTurn === 'STRATEGY_TURN') {
-        game.requestPushFrame = true;
-        game.produceFrame();
-    }
-}
-
 export const restartGame = async () => {
     game.restart();
 }
 
+export const getOnStageHero = async () => game.onStageHero.stage;
+
+export const hero_stage_get = async (idx: number) => await game.onStageHero.get(idx);
+export const hero_stage_set = async (idx: number, maybeHero: heroState|null) => await game.onStageHero.set(idx, maybeHero);
+export const hero_stage_delete = async (idx: number) => await game.onStageHero.delete(idx);
+export const hero_stage_reset = async () => await game.onStageHero.reset();
+
 export default () => ({
     startFighting,
     addConsumedFrameNumber,
-    moveHero,
-    deleteHero,
-    buyHero,
+    // moveHero,
+    // deleteHero,
+    // buyHero,
     restartGame,
+    getOnStageHero,
+    hero_stage_get,
+    hero_stage_set,
+    hero_stage_delete,
+    hero_stage_reset,
     addEventListener: self.addEventListener,
 });

@@ -1,4 +1,4 @@
-import type { Hero, heroCopy } from "./worker/Hero";
+import type { Hero, heroState } from "./worker/Hero";
 
 export const battleGroundDistance = 1700;
 export const battleGroundWidth = 1000;
@@ -47,7 +47,7 @@ export type heroInfo = {
 }
 
 export type heroInfoSet = {
-    hero: heroCopy|null;
+    hero: heroState|null;
     heroInfo: heroInfo;
 }
 

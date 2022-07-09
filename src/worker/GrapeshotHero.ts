@@ -3,8 +3,8 @@ import { GrapeshotBullet } from "./GrapeshotBullet";
 import { Hero } from "./Hero";
 
 export class GrapeshotHero extends Hero {
-    cycle = 5;
-    bulletNumber = 5;
+    cycle = 3;
+    bulletNumber = 1;
     type = 'grapeshotHero';
 
     static fromPosition(game: Game, position: {x: number, y: number}): GrapeshotHero {

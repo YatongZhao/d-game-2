@@ -34,7 +34,7 @@ export class EnemySet {
     prepareEnemySet() {
         let enemys: Enemy[] = [];
         for (let i = 0; i < 450; i++) {
-            enemys.push(new Enemy(this.round.game, Math.ceil(Math.random() * (-1 + 2 * this.round.roundNumber + 0.1 * Math.floor(i / 15))), i));
+            enemys.push(new Enemy(this.round.game, Math.ceil(Math.random() * (-1 + 2 * this.round.roundNumber + 0.05 * Math.floor(i / 15))), i));
         }
 
         this.enemys = enemys;
@@ -76,8 +76,9 @@ export class EnemySet {
     }
 
     findEnemyByPoint(x: number, y: number) {
-        if ((x - enemyXStartPadding) % (enemyXSpace + enemySize) > enemySize
-            || ((y % (enemyYSpace + enemySize) + (this.lengthTraveled % (enemyYSpace + enemySize))) % (enemyYSpace + enemySize) > enemySize)) {
+        const outLine = 2;
+        if ((x - enemyXStartPadding) % (enemyXSpace + enemySize) - outLine > enemySize + outLine
+            || ((y % (enemyYSpace + enemySize) + (this.lengthTraveled % (enemyYSpace + enemySize))) % (enemyYSpace + enemySize) - outLine > enemySize + outLine)) {
                 return null;
         }
     

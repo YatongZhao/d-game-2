@@ -23,7 +23,8 @@ export class GrapeshotBullet extends Bullet {
         this.y = this.hero.y + battleGroundDistance;
         this.direction = Math.PI*0.4*(Math.random() - 0.5);
         this.direction === 0 && (this.direction = Math.PI*0.1);
-        this.speed = 500 + Math.floor(Math.random() * 500);
+        // this.speed = 10 + Math.floor(Math.random() * 10);
+        this.speed = 1 + Math.random();
     }
 
     copy() {
@@ -38,6 +39,11 @@ export class GrapeshotBullet extends Bullet {
     }
 
     go() {
+        if (this.speed < 10) {
+            this.speed += 0.1;
+        } else if (this.speed < 500) {
+            this.speed *= 1.1;
+        }
         for (let i = 0; i < this.speed; i++) {
             this.x += Math.sin(this.direction);
             this.y -= Math.cos(this.direction);
@@ -54,6 +60,7 @@ export class GrapeshotBullet extends Bullet {
                 let isKilled = maybeEnemy.hited(this.ATK);
                 if (isKilled) {
                     this.game.$++;
+                    this.hero.killNumber++;
                 }
                 this.isDied = true;
                 return;
